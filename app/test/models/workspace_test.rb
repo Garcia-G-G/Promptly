@@ -82,12 +82,11 @@ class WorkspaceTest < ActiveSupport::TestCase
     assert_equal "starter", workspace.plan
   end
 
-  # TODO: Uncomment when Membership model is created in Task 5
-  # test "destroys memberships on delete" do
-  #   workspace = Workspace.create!(name: "Test", slug: "test", owner: @owner)
-  #   Membership.create!(workspace: workspace, user: @owner, role: :owner)
-  #   assert_difference "Membership.count", -1 do
-  #     workspace.destroy
-  #   end
-  # end
+  test "destroys memberships on delete" do
+    workspace = Workspace.create!(name: "Test", slug: "test", owner: @owner)
+    Membership.create!(workspace: workspace, user: @owner, role: :owner)
+    assert_difference "Membership.count", -1 do
+      workspace.destroy
+    end
+  end
 end
