@@ -1,0 +1,38 @@
+# macOS
+.DS_Store
+._*
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Claude Code
+.claude/
+!.claude/settings.json
+
+# Rails app (see app/.gitignore for Rails-specific)
+app/log/
+app/tmp/
+app/storage/
+app/.bundle/
+app/coverage/
+app/public/assets/
+
+# Gem
+gem/pkg/
+gem/.bundle/
+gem/coverage/
+gem/Gemfile.lock
+
+# Node (if any tooling sneaks in)
+node_modules/
+
+# OS-level
+Thumbs.db
