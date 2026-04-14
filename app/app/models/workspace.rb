@@ -3,7 +3,7 @@ class Workspace < ApplicationRecord
 
   has_many :memberships, dependent: :destroy
   has_many :users, through: :memberships
-  has_many :projects
+  has_many :projects, dependent: :destroy
   has_many :api_keys
 
   normalizes :slug, with: -> { _1.strip.downcase }

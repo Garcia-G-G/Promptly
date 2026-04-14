@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_14_205346) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_14_205633) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -23,6 +23,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_14_205346) do
     t.index ["user_id"], name: "index_memberships_on_user_id"
     t.index ["workspace_id", "user_id"], name: "index_memberships_on_workspace_id_and_user_id", unique: true
     t.index ["workspace_id"], name: "index_memberships_on_workspace_id"
+  end
+
+  create_table "projects", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "workspace_id", null: false
+    t.index ["workspace_id", "slug"], name: "index_projects_on_workspace_id_and_slug", unique: true
+    t.index ["workspace_id"], name: "index_projects_on_workspace_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -58,5 +68,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_14_205346) do
 
   add_foreign_key "memberships", "users"
   add_foreign_key "memberships", "workspaces"
+  add_foreign_key "projects", "workspaces"
   add_foreign_key "workspaces", "users", column: "owner_id"
 end
