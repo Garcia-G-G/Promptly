@@ -16,6 +16,14 @@ Rails.application.routes.draw do
         end
         resources :versions, only: [ :create ], controller: "prompt_versions"
         post :promote, on: :member
+        resources :experiments, only: [ :index, :create ], controller: "experiments"
+      end
+
+      resources :experiments, only: [ :update ] do
+        member do
+          post :advance_canary
+          get :stats
+        end
       end
     end
   end
