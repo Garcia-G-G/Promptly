@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_14_212608) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_14_215826) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -25,6 +25,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_14_212608) do
     t.bigint "workspace_id", null: false
     t.index ["key_digest"], name: "index_api_keys_on_key_digest", unique: true
     t.index ["workspace_id"], name: "index_api_keys_on_workspace_id"
+  end
+
+  create_table "experiments", force: :cascade do |t|
+    t.float "auto_rollback_threshold"
+    t.integer "canary_stage"
+    t.datetime "concluded_at"
+    t.datetime "created_at", null: false
+    t.string "environment", default: "production", null: false
+    t.string "name", null: false
+    t.bigint "prompt_id", null: false
+    t.datetime "started_at"
+    t.string "status", default: "draft", null: false
+    t.integer "traffic_split", default: 50, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "variant_a_version_id", null: false
+    t.bigint "variant_b_version_id", null: false
+    t.bigint "winner_version_id"
+    t.index ["prompt_id", "environment"], name: "idx_experiments_one_running_per_prompt_env", unique: true, where: "((status)::text = 'running'::text)"
+    t.index ["prompt_id", "name"], name: "index_experiments_on_prompt_id_and_name", unique: true
+    t.index ["prompt_id"], name: "index_experiments_on_prompt_id"
+    t.index ["variant_a_version_id"], name: "index_experiments_on_variant_a_version_id"
+    t.index ["variant_b_version_id"], name: "index_experiments_on_variant_b_version_id"
+    t.index ["winner_version_id"], name: "index_experiments_on_winner_version_id"
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -110,6 +133,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_14_212608) do
   end
 
   add_foreign_key "api_keys", "workspaces"
+  add_foreign_key "experiments", "prompt_versions", column: "variant_a_version_id"
+  add_foreign_key "experiments", "prompt_versions", column: "variant_b_version_id"
+  add_foreign_key "experiments", "prompt_versions", column: "winner_version_id"
+  add_foreign_key "experiments", "prompts"
   add_foreign_key "memberships", "users"
   add_foreign_key "memberships", "workspaces"
   add_foreign_key "projects", "workspaces"

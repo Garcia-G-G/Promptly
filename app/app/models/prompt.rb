@@ -2,6 +2,7 @@ class Prompt < ApplicationRecord
   belongs_to :project
 
   has_many :prompt_versions, dependent: :destroy
+  has_many :experiments, dependent: :destroy
 
   normalizes :slug, with: -> { _1.strip.downcase }
 
