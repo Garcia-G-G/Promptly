@@ -27,12 +27,19 @@ module Api
         result = Prompts::Resolve.call(
           project: current_project,
           slug: params[:slug],
-          environment: env
+          environment: env,
+          request_id: params[:request_id]
         )
 
         version = result[:version]
         response.headers["X-Promptly-Version"] = version.version_number.to_s
         response.headers["X-Promptly-Content-Hash"] = version.content_hash
+        response.headers["X-Promptly-Source"] = result[:source].to_s
+
+        if result[:experiment]
+          response.headers["X-Promptly-Experiment-Id"] = result[:experiment].id.to_s
+          response.headers["X-Promptly-Variant"] = (result[:variant] || "baseline").to_s
+        end
 
         render json: Serializers::ResolveSerializer.call(version)
       end
