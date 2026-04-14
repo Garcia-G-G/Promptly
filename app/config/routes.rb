@@ -9,8 +9,14 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      post "prompts/:slug/resolve", to: "prompts#resolve", as: :prompt_resolve
-      post "prompts/:slug/log",     to: "prompts#log",     as: :prompt_log
+      resources :prompts, param: :slug, only: [ :index, :create, :show ] do
+        member do
+          post :resolve
+          post :log
+        end
+        resources :versions, only: [ :create ], controller: "prompt_versions"
+        post :promote, on: :member
+      end
     end
   end
 

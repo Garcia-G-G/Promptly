@@ -1,0 +1,15 @@
+module PromptVersions
+  class Push
+    def self.call(prompt:, content:, variables: [], model_hint: "claude-sonnet-4-6", created_by: nil, created_via: :api, parent_version: nil)
+      prompt.prompt_versions.create!(
+        content: content,
+        variables: variables,
+        model_hint: model_hint,
+        environment: :dev,
+        created_by: created_by,
+        created_via: created_via,
+        parent_version: parent_version
+      )
+    end
+  end
+end
