@@ -39,7 +39,7 @@ class WorkspaceTest < ActiveSupport::TestCase
   test "slug format rejects invalid characters" do
     # Note: uppercase slugs are normalized to lowercase before validation,
     # so "UPPER" becomes "upper" (valid). Test only truly invalid characters.
-    invalid_slugs = ["under_score", "special!", "slug with spaces"]
+    invalid_slugs = [ "under_score", "special!", "slug with spaces" ]
     invalid_slugs.each do |slug|
       workspace = Workspace.new(name: "Test", slug: slug, owner: @owner)
       assert_not workspace.valid?, "Expected '#{slug}' to be invalid"
