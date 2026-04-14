@@ -1,4 +1,6 @@
 class PromptVersion < ApplicationRecord
+  DEFAULT_MODEL_HINT = "claude-sonnet-4-6"
+
   belongs_to :prompt
   belongs_to :parent_version, class_name: "PromptVersion", optional: true
   belongs_to :created_by, class_name: "User", optional: true
@@ -9,6 +11,7 @@ class PromptVersion < ApplicationRecord
   validates :content, presence: true
   validates :version_number, presence: true, uniqueness: { scope: :prompt_id }
   validates :environment, inclusion: { in: environments.keys }
+  validates :content, length: { maximum: 100_000 }
 
   before_validation :compute_content_hash
   before_validation :assign_version_number, on: :create

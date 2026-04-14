@@ -154,4 +154,45 @@ class Api::V1::PromptsControllerTest < ActionDispatch::IntegrationTest
       headers: { "X-Promptly-Key" => "pk_test_key_for_fixtures_only", "X-Promptly-Project" => "playground" }
     assert_response :success
   end
+
+  # --- Cross-workspace security ---
+
+  test "API key cannot access project from different workspace" do
+    other_workspace = Workspace.create!(name: "Other", slug: "other-ws", owner: users(:owner))
+    Project.create!(workspace: other_workspace, name: "Secret", slug: "secret-project")
+
+    get api_v1_prompts_path, headers: api_headers(project_slug: "secret-project")
+    assert_response :not_found
+  end
+
+  test "nonexistent project returns 404" do
+    get api_v1_prompts_path, headers: api_headers(project_slug: "does-not-exist")
+    assert_response :not_found
+  end
+
+  # --- Error response consistency ---
+
+  test "all error responses include message field" do
+    get api_v1_prompts_path, headers: api_headers(project_slug: nil)
+    body = response.parsed_body
+    assert body.key?("error")
+    assert body.key?("message")
+  end
+
+  test "401 error includes message" do
+    get api_v1_prompts_path, headers: { "X-Promptly-Project" => "playground" }
+    body = response.parsed_body
+    assert_equal "invalid_api_key", body["error"]
+    assert body["message"].present?
+  end
+
+  # --- Promote edge cases ---
+
+  test "promote to invalid environment returns 422" do
+    version = prompt_versions(:doc_summarizer_dev)
+    post promote_api_v1_prompt_path(slug: "doc-summarizer"),
+      params: { version_id: version.id, to_environment: "dev" }.to_json,
+      headers: api_headers
+    assert_response :unprocessable_entity
+  end
 end

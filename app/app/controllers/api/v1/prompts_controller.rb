@@ -23,7 +23,7 @@ module Api
       end
 
       def resolve
-        env = params[:environment] || "production"
+        env = params[:environment] || Prompts::Resolve::DEFAULT_ENVIRONMENT
         result = Prompts::Resolve.call(
           project: current_project,
           slug: params[:slug],

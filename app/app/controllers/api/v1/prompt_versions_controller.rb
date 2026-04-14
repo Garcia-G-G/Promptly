@@ -9,7 +9,7 @@ module Api
           prompt: prompt,
           content: params.require(:content),
           variables: params[:variables] || [],
-          model_hint: params[:model_hint] || "claude-sonnet-4-6",
+          model_hint: params[:model_hint] || PromptVersion::DEFAULT_MODEL_HINT,
           created_via: :api
         )
         render json: Serializers::PromptVersionSerializer.call(version), status: :created

@@ -8,4 +8,5 @@ class Prompt < ApplicationRecord
   validates :slug, presence: true,
     uniqueness: { scope: :project_id },
     format: { with: /\A[a-z0-9-]+\z/, message: "only allows lowercase letters, numbers, and hyphens" }
+  validates :description, length: { maximum: 2000 }, allow_blank: true
 end

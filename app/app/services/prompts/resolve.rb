@@ -1,6 +1,8 @@
 module Prompts
   class Resolve
-    def self.call(project:, slug:, environment: "production")
+    DEFAULT_ENVIRONMENT = "production"
+
+    def self.call(project:, slug:, environment: DEFAULT_ENVIRONMENT)
       prompt = project.prompts.find_by(slug: slug)
       raise Prompts::NotFound, "Prompt '#{slug}' not found" unless prompt
 
