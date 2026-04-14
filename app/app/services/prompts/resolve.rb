@@ -1,7 +1,4 @@
 module Prompts
-  class NotFound < StandardError; end
-  class NoActiveVersion < StandardError; end
-
   class Resolve
     def self.call(project:, slug:, environment: "production")
       prompt = project.prompts.find_by(slug: slug)
