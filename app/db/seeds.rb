@@ -1,9 +1,25 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
+puts "Seeding database..."
+
+owner = User.find_or_create_by!(email: ENV.fetch("SEED_OWNER_EMAIL", "owner@promptly.dev")) do |u|
+  u.password = ENV.fetch("SEED_OWNER_PASSWORD", "promptly-dev")
+  u.name = "Demo Owner"
+end
+owner.confirm unless owner.confirmed?
+
+workspace = Workspace.find_or_create_by!(slug: "demo") do |w|
+  w.name = "Demo"
+  w.owner = owner
+end
+
+Membership.find_or_create_by!(workspace: workspace, user: owner) do |m|
+  m.role = :owner
+end
+
+Project.find_or_create_by!(workspace: workspace, slug: "playground") do |p|
+  p.name = "Playground"
+end
+
+puts "Seeding complete."
+puts "  Owner: #{owner.email}"
+puts "  Workspace: #{workspace.slug}"
+puts "  Project: playground"
