@@ -1,0 +1,9 @@
+<h1>Promptly</h1>
+<p>Git + Vercel, but for your LLM prompts.</p>
+
+<% if user_signed_in? %>
+  <%= link_to "New Workspace", new_workspace_path %>
+<% else %>
+  <%= link_to "Sign Up", new_user_registration_path %>
+  <%= link_to "Sign In", new_user_session_path %>
+<% end %>
