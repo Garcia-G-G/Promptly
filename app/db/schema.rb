@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_14_204922) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_14_205125) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -31,4 +31,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_14_204922) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
+
+  create_table "workspaces", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "owner_id", null: false
+    t.string "plan", default: "starter", null: false
+    t.string "slug", null: false
+    t.string "stripe_customer_id"
+    t.string "stripe_meter_id"
+    t.datetime "updated_at", null: false
+    t.index ["owner_id"], name: "index_workspaces_on_owner_id"
+    t.index ["slug"], name: "index_workspaces_on_slug", unique: true
+  end
+
+  add_foreign_key "workspaces", "users", column: "owner_id"
 end
