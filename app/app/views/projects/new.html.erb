@@ -1,0 +1,27 @@
+<h1>New Project in <%= @workspace.name %></h1>
+
+<%= form_with model: @project, url: workspace_projects_path(@workspace.slug) do |f| %>
+  <% if @project.errors.any? %>
+    <div id="error_explanation">
+      <ul>
+        <% @project.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name %>
+    <%= f.text_field :name, required: true %>
+  </div>
+
+  <div>
+    <%= f.label :slug %>
+    <%= f.text_field :slug, required: true, pattern: "[a-z0-9-]+" %>
+  </div>
+
+  <div>
+    <%= f.submit "Create Project" %>
+  </div>
+<% end %>

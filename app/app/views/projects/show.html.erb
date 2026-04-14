@@ -1,0 +1,5 @@
+<h1><%= @project.name %></h1>
+<p>Workspace: <%= @workspace.name %></p>
+<p>Slug: <code><%= @project.slug %></code></p>
+
+<%= link_to "Back to Projects", workspace_projects_path(@workspace.slug) %>
