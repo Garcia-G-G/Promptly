@@ -2,57 +2,72 @@
 
 > Git + Vercel, but for your LLM prompts.
 
-Promptly is a **prompt version control and A/B testing platform** for developers building applications with LLMs (GPT, Gemini, etc.). It treats prompts as first-class versioned artifacts, with environments, traffic splitting, rollback, evaluation, and a dashboard.
+Promptly is a **prompt version control and A/B testing platform** for developers building applications with LLMs. It treats prompts as first-class versioned artifacts — with environments, traffic splitting, rollback, evaluation, and a dashboard — so teams stop managing prompts as hardcoded strings and start shipping them like code.
 
-## Why?
+## The Problem
 
-Developers manage prompts in the worst possible ways: hardcoded strings, pasted into Notion or Slack, no history, no visibility into whether a change improved or broke things. Existing tools cost $150–$249/month or lock you into their cloud. Promptly targets indie developers and small teams (1–5 people) with a $29/month tier and feature parity with the big players.
+Developers building with LLMs manage prompts in the worst possible ways: hardcoded strings buried in source code, copy-pasted into Notion or Slack, no history, and zero visibility into whether a change improved or broke things. When it's time to A/B test a prompt, everyone builds custom infrastructure from scratch.
 
-## Repo structure
+Existing tools charge $150–$249/month, lock you into their cloud, or treat prompt management as an afterthought behind observability dashboards.
 
+## How Promptly Works
+
+### Version Control for Prompts
+
+Every prompt has a slug, immutable version history, and a unique SHA-256 content hash. Push new versions via the SDK or UI — every change is tracked, diffable, and reversible.
+
+### Environments
+
+Prompts flow through `dev` → `staging` → `production`, just like code. Promote a version through environments before it reaches users. Roll back to any previous version with one click.
+
+### A/B Testing with Live Traffic Splitting
+
+Define 70/30 or 50/50 splits between prompt variants. The SDK routes requests automatically with sticky sessions so the same user always sees the same variant. Bayesian significance detection tells you when a winner emerges.
+
+### Canary Promotion
+
+Roll out a new prompt version gradually: 1% → 10% → 50% → 100%. If quality scores drop below your threshold, Promptly auto-rolls back to the previous version.
+
+### Eval Datasets & LLM-as-Judge Scoring
+
+Upload test cases as CSV. New prompt versions run against your dataset automatically before promotion to production is allowed. Configure custom scoring prompts (quality, tone, factuality) — scorers are versioned resources too.
+
+### Security Scanning
+
+Every new prompt version is scanned for prompt injection patterns, PII leakage, and jailbreak risks before it can be promoted to production.
+
+### SDK in 3 Lines
+
+```ruby
+Promptly.configure { |c| c.api_key = ENV["PROMPTLY_KEY"] }
+
+prompt = Promptly.get("doc-summarizer", vars: { language: "Spanish" })
 ```
-promptly/
-├── app/           # Rails 8 application (backend + Hotwire UI)
-├── gem/           # Ruby gem `promptly` (SDK, zero Rails dependency)
-├── docs/          # Product documentation and ADRs
-├── prompts/       # Task briefs, one per milestone step
-├── CONTEXT.md     # Full product context (read first)
-├── CLAUDE.md      # Working conventions
-└── README.md
-```
 
-## Stack
+The SDK handles environment resolution, A/B routing, variable interpolation, and logging — all in one call. Ruby first, Python and JavaScript coming soon.
 
-- Rails 8 + Hotwire + Postgres 16 + Redis (A/B router only)
-- Solid Queue / Solid Cache / Solid Cable (no Sidekiq)
-- Stripe Billing Meters
-- OpenTelemetry GenAI semantic conventions
-- Kamal 2 + Hetzner for deploys
+### Replay & Time-Travel Debugging
 
-Full details in [`CONTEXT.md`](./CONTEXT.md).
+Every logged request stores input, output, and variables. Re-run any past request from the UI with a different prompt version or model to see what would have changed.
 
-## Local development
+### OpenTelemetry Native
 
-```bash
-cd app
-bin/setup        # install gems, create DB, run migrations, seed
-bin/dev          # start Rails server + Solid Queue via foreman
-```
+The SDK emits `gen_ai.*` spans out of the box. If you already use Datadog, Honeycomb, or Grafana, you get instant observability with zero extra code.
 
-The seed command prints a dev API key on first run — copy it, it won't be shown again.
+### GitHub Integration
 
-## Conventions
+A bot comments on PRs that touch prompts: what changed, active experiments, and expected impact.
 
-- All code, specs, variable names, commits, PRs → **English**
-- All operational instructions in [`CLAUDE.md`](./CLAUDE.md)
+## Pricing
 
-## Milestones
+| Plan | Price | Includes |
+|------|-------|----------|
+| **Open Source** | Free | Self-hosted, full features, unlimited usage |
+| **Cloud Starter** | $29/mo | 5 projects, 50k SDK calls/mo, 3 experiments, 100 eval runs/mo |
+| **Cloud Pro** | $79/mo | Unlimited projects & experiments, GitHub + Slack integration, security scans |
 
-- **Week 1** — Backend core (models, CRUD, `/resolve`, A/B router, API keys)
-- **Week 2** — Ruby SDK + logging + async scoring
-- **Week 3** — UI + experiments + evals + security scan
-- **Week 4** — Canary deploys, Bayesian significance, Stripe, GitHub bot, landing, publish gem
+Overage: $0.0002 per additional SDK call.
 
 ## License
 
-MIT — the core is open source. Cloud offers operational features and support.
+MIT — the core is open source. Cloud adds operational features and support.
