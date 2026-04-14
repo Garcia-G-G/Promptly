@@ -11,5 +11,13 @@ module ActiveSupport
     fixtures :all
 
     # Add more helper methods to be used by all tests here...
+
+    private
+
+    def api_headers(raw_key: "pk_test_key_for_fixtures_only", project_slug: "playground")
+      headers = { "Authorization" => "Bearer #{raw_key}", "Content-Type" => "application/json" }
+      headers["X-Promptly-Project"] = project_slug if project_slug
+      headers
+    end
   end
 end

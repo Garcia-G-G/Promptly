@@ -9,7 +9,6 @@ class PromptVersion < ApplicationRecord
   validates :content, presence: true
   validates :version_number, presence: true, uniqueness: { scope: :prompt_id }
   validates :environment, inclusion: { in: environments.keys }
-  validates :created_via, inclusion: { in: created_vias.keys }
 
   before_validation :compute_content_hash
   before_validation :assign_version_number, on: :create
