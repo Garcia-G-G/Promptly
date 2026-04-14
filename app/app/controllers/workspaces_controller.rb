@@ -7,11 +7,13 @@ class WorkspacesController < ApplicationController
     @workspace = Workspace.new(workspace_params)
     @workspace.owner = current_user
 
-    if @workspace.save
-      Membership.create!(workspace: @workspace, user: current_user, role: :owner)
-      redirect_to workspace_path(@workspace.slug), notice: "Workspace created."
-    else
-      render :new, status: :unprocessable_entity
+    ActiveRecord::Base.transaction do
+      if @workspace.save
+        Membership.create!(workspace: @workspace, user: current_user, role: :owner)
+        redirect_to workspace_path(@workspace.slug), notice: "Workspace created."
+      else
+        render :new, status: :unprocessable_entity
+      end
     end
   end
 

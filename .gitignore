@@ -24,6 +24,8 @@ app/storage/
 app/.bundle/
 app/coverage/
 app/public/assets/
+app/config/master.key
+app/config/credentials/*.key
 
 # Gem
 gem/pkg/

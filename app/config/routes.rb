@@ -14,7 +14,11 @@ Rails.application.routes.draw do
     end
   end
 
-  mount MissionControl::Jobs::Engine, at: "/jobs" if defined?(MissionControl::Jobs)
+  if defined?(MissionControl::Jobs)
+    authenticate :user do
+      mount MissionControl::Jobs::Engine, at: "/jobs"
+    end
+  end
 
   get "up" => "rails/health#show", as: :rails_health_check
 end

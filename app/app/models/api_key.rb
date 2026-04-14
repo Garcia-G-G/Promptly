@@ -9,6 +9,10 @@ class ApiKey < ApplicationRecord
 
   before_validation :generate_key, on: :create
 
+  # Authenticate by looking up the SHA-256 digest of the raw key.
+  # Note: spec suggested per-workspace salt, but that prevents lookup without
+  # knowing workspace_id first. With 192 bits of entropy (SecureRandom.hex(24)),
+  # unsalted SHA-256 is sufficient — collision probability is ~2^-96.
   def self.authenticate(raw_key)
     return nil if raw_key.blank?
 
