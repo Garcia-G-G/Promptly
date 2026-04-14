@@ -12,6 +12,10 @@ module ActiveSupport
 
     # Add more helper methods to be used by all tests here...
 
+    setup do
+      Promptly::Redis.with { |r| r.flushdb }
+    end
+
     private
 
     def api_headers(raw_key: "pk_test_key_for_fixtures_only", project_slug: "playground")
