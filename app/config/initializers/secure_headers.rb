@@ -6,11 +6,14 @@ SecureHeaders::Configuration.default do |config|
   config.x_permitted_cross_domain_policies = "none"
   config.referrer_policy = %w[strict-origin-when-cross-origin]
 
+  connect_sources = %w['self']
+  connect_sources += %w[ws://localhost:* wss://localhost:*] if Rails.env.local?
+
   config.csp = {
     default_src: %w['self'],
     script_src: %w['self' 'unsafe-inline'],
     style_src: %w['self' 'unsafe-inline'],
-    connect_src: %w['self' ws://localhost:* wss://localhost:*],
+    connect_src: connect_sources,
     img_src: %w['self' data:],
     font_src: %w['self'],
     frame_ancestors: %w['none'],
