@@ -1,58 +1,58 @@
 # Promptly
 
-> Git + Vercel, pero para tus prompts de LLM.
+> Git + Vercel, but for your LLM prompts.
 
-Promptly es una plataforma de **control de versiones y A/B testing de prompts** para desarrolladores que construyen aplicaciones con LLMs (Claude, GPT, Gemini). Trata los prompts como artefactos versionados de primera clase, con entornos, split de tráfico, rollback, evaluación y un dashboard.
+Promptly is a **prompt version control and A/B testing platform** for developers building applications with LLMs (GPT, Gemini, etc.). It treats prompts as first-class versioned artifacts, with environments, traffic splitting, rollback, evaluation, and a dashboard.
 
-## ¿Por qué?
+## Why?
 
-Los devs gestionan prompts de la peor forma posible: strings hardcodeados, pegados en Notion o Slack, sin historial, sin visibilidad de si un cambio mejoró o rompió algo. Las herramientas existentes cuestan $150–$249/mes o te amarran a su cloud. Promptly apunta al dev indie y al equipo pequeño (1–5 personas) con un tier de $29/mes y paridad de features con los grandes.
+Developers manage prompts in the worst possible ways: hardcoded strings, pasted into Notion or Slack, no history, no visibility into whether a change improved or broke things. Existing tools cost $150–$249/month or lock you into their cloud. Promptly targets indie developers and small teams (1–5 people) with a $29/month tier and feature parity with the big players.
 
-## Estructura del repo
+## Repo structure
 
 ```
 promptly/
-├── app/           # Aplicación Rails 8 (backend + UI Hotwire)
-├── gem/           # Ruby gem `promptly` (SDK, sin dependencia de Rails)
-├── docs/          # Documentación del producto y ADRs
-├── prompts/       # Prompts para Claude Code, uno por paso del milestone
-├── CONTEXT.md     # Contexto completo del producto (leer primero)
-├── CLAUDE.md      # Convenciones de trabajo para Claude Code
+├── app/           # Rails 8 application (backend + Hotwire UI)
+├── gem/           # Ruby gem `promptly` (SDK, zero Rails dependency)
+├── docs/          # Product documentation and ADRs
+├── prompts/       # Task briefs, one per milestone step
+├── CONTEXT.md     # Full product context (read first)
+├── CLAUDE.md      # Working conventions
 └── README.md
 ```
 
 ## Stack
 
-- Rails 8 + Hotwire + Postgres 16 + Redis (solo A/B router)
-- Solid Queue / Solid Cache / Solid Cable (nada de Sidekiq)
-- Anthropic `anthropic` gem (oficial) + Claude Sonnet 4.6 para scoring
+- Rails 8 + Hotwire + Postgres 16 + Redis (A/B router only)
+- Solid Queue / Solid Cache / Solid Cable (no Sidekiq)
 - Stripe Billing Meters
 - OpenTelemetry GenAI semantic conventions
-- Kamal 2 + Hetzner para deploy
+- Kamal 2 + Hetzner for deploys
 
-Detalles completos en [`CONTEXT.md`](./CONTEXT.md).
+Full details in [`CONTEXT.md`](./CONTEXT.md).
 
-## Cómo usar este repo con Claude Code
+## Local development
 
-1. Clona el repo.
-2. Abre Claude Code en la raíz (`claude` desde esta carpeta).
-3. Claude leerá `CLAUDE.md` y `CONTEXT.md` automáticamente.
-4. Pasa el prompt del paso actual, ej: `prompts/01-rails-app-scaffold.md`.
-5. Revisa el PR, haz merge, pasa al siguiente paso.
+```bash
+cd app
+bin/setup        # install gems, create DB, run migrations, seed
+bin/dev          # start Rails server + Solid Queue via foreman
+```
 
-## Convenciones
+The seed command prints a dev API key on first run — copy it, it won't be shown again.
 
-- Código, specs, nombres, commits, PRs → **inglés**.
-- Comunicación con el equipo → **español**.
-- Todas las instrucciones operativas en [`CLAUDE.md`](./CLAUDE.md).
+## Conventions
+
+- All code, specs, variable names, commits, PRs → **English**
+- All operational instructions in [`CLAUDE.md`](./CLAUDE.md)
 
 ## Milestones
 
-- **Semana 1** — Backend core (modelos, CRUD, `/resolve`, A/B router, API keys)
-- **Semana 2** — SDK Ruby + logging + scoring async con Claude
-- **Semana 3** — UI + experiments + evals + security scan
-- **Semana 4** — Canary deploys, Bayesian significance, Stripe, GitHub bot, landing, publicar gem
+- **Week 1** — Backend core (models, CRUD, `/resolve`, A/B router, API keys)
+- **Week 2** — Ruby SDK + logging + async scoring
+- **Week 3** — UI + experiments + evals + security scan
+- **Week 4** — Canary deploys, Bayesian significance, Stripe, GitHub bot, landing, publish gem
 
-## Licencia
+## License
 
-MIT — el core es open source. Cloud ofrece features operacionales y soporte.
+MIT — the core is open source. Cloud offers operational features and support.
