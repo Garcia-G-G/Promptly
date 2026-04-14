@@ -122,7 +122,7 @@ class Api::V1::PromptsControllerTest < ActionDispatch::IntegrationTest
       headers: api_headers
     assert_response :success
     body = response.parsed_body
-    assert body["content"].include?("{language}")
+    assert_includes body["content"], "{language}"
   end
 
   test "POST /prompts/:slug/resolve with no active version returns 404" do

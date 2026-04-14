@@ -26,7 +26,7 @@ class PromptVersions::PushTest < ActiveSupport::TestCase
   end
 
   test "stores variables" do
-    vars = [{ "name" => "lang", "default" => "en" }]
+    vars = [ { "name" => "lang", "default" => "en" } ]
     version = PromptVersions::Push.call(prompt: @prompt, content: "Hello", variables: vars)
     assert_equal vars, version.variables
   end
