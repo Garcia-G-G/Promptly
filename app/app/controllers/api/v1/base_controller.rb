@@ -12,6 +12,10 @@ module Api
           details: e.record.errors.as_json, status: :unprocessable_entity)
       end
 
+      rescue_from ActiveRecord::RecordNotUnique do |e|
+        render_error("conflict", message: e.message.truncate(200), status: :unprocessable_entity)
+      end
+
       rescue_from ActionController::ParameterMissing do |e|
         render_error("missing_parameter", message: "Missing required parameter: #{e.param}", status: :bad_request)
       end

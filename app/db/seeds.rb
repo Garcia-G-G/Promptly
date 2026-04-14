@@ -61,6 +61,46 @@ else
   puts ""
 end
 
+# Create alternative version for A/B testing
+alt_dev_version = nil
+unless prompt.prompt_versions.exists?(content: "You are a concise document summarizer.\n\nProvide a brief summary of the following document in {language}.\nUse {length} format. Be direct and avoid filler.\n\nDocument:\n{document}")
+  # Archive current dev to make room for the new one
+  current_dev = prompt.prompt_versions.find_by(environment: "dev")
+  current_dev&.update!(environment: :archived)
+
+  alt_dev_version = PromptVersions::Push.call(
+    prompt: prompt,
+    content: "You are a concise document summarizer.\n\nProvide a brief summary of the following document in {language}.\nUse {length} format. Be direct and avoid filler.\n\nDocument:\n{document}",
+    variables: [
+      { "name" => "language", "description" => "Target language", "default" => "English" },
+      { "name" => "length", "description" => "Output format", "default" => "3 bullet points" },
+      { "name" => "document", "description" => "The document to summarize", "default" => "" }
+    ],
+    created_via: :api
+  )
+end
+
+# Create demo experiment
+prod_version = prompt.prompt_versions.find_by(environment: "production")
+alt_version = alt_dev_version || prompt.prompt_versions.where(environment: %w[dev archived]).order(version_number: :desc).first
+
+unless prompt.experiments.exists?(name: "tone-tweak")
+  if prod_version && alt_version && prod_version.id != alt_version.id
+    exp = Experiment.create!(
+      prompt: prompt,
+      name: "tone-tweak",
+      variant_a_version: prod_version,
+      variant_b_version: alt_version,
+      traffic_split: 50,
+      environment: "production",
+      canary_stage: 10,
+      status: :running,
+      started_at: Time.current
+    )
+    puts "  Experiment: #{exp.name} (running, canary_stage: #{exp.canary_stage})"
+  end
+end
+
 puts "Seeding complete."
 puts "  Owner: #{owner.email}"
 puts "  Workspace: #{workspace.slug}"
