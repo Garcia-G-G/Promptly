@@ -1,6 +1,9 @@
 class Project < ApplicationRecord
   belongs_to :workspace
 
+  has_many :prompts, dependent: :destroy
+  has_many :scorers, dependent: :destroy
+
   normalizes :slug, with: -> { _1.strip.downcase }
 
   validates :name, presence: true
