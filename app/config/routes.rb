@@ -25,6 +25,8 @@ Rails.application.routes.draw do
           get :stats
         end
       end
+
+      resources :scorers, only: [ :index, :create, :update, :destroy ]
     end
   end
 

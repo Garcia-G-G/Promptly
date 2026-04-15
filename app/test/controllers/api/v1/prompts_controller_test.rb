@@ -142,9 +142,12 @@ class Api::V1::PromptsControllerTest < ActionDispatch::IntegrationTest
 
   test "POST /prompts/:slug/log returns 202 accepted" do
     post log_api_v1_prompt_path(slug: "doc-summarizer"),
+      params: { output: "This is the model output." }.to_json,
       headers: api_headers
     assert_response :accepted
-    assert response.parsed_body["accepted"]
+    body = response.parsed_body
+    assert body["accepted"]
+    assert_not_nil body["log_id"]
   end
 
   # --- X-Promptly-Key alternative auth ---

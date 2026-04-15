@@ -54,10 +54,29 @@ module Api
       end
 
       def log
-        render json: { accepted: true }, status: :accepted
+        log_record = Logs::Create.call(
+          prompt: @prompt,
+          project: current_project,
+          params: log_params
+        )
+        render json: { accepted: true, log_id: log_record.id }, status: :accepted
       end
 
       private
+
+      def log_params
+        {
+          request_id: params[:request_id],
+          output: params.require(:output),
+          input_vars: params[:input_vars],
+          latency_ms: params[:latency_ms],
+          tokens: params[:tokens],
+          model_version: params[:model_version],
+          environment: params[:environment],
+          otel_trace_id: params[:otel_trace_id],
+          otel_span_id: params[:otel_span_id]
+        }
+      end
 
       def set_prompt
         @prompt = current_project.prompts.find_by!(slug: params[:slug])
