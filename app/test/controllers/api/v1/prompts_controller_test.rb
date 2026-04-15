@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Api::V1::PromptsControllerTest < ActionDispatch::IntegrationTest
+  include ActiveJob::TestHelper
+
   # --- Auth tests ---
 
   test "missing auth header returns 401" do
@@ -138,16 +140,53 @@ class Api::V1::PromptsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  # --- Log stub ---
+  # --- Log ---
 
-  test "POST /prompts/:slug/log returns 202 accepted" do
+  test "POST /log returns 202 with log_id" do
     post log_api_v1_prompt_path(slug: "doc-summarizer"),
-      params: { output: "This is the model output." }.to_json,
+      params: {
+        output: "A great summary",
+        input_vars: { language: "English" },
+        latency_ms: 230,
+        model_version: "claude-sonnet-4-6"
+      }.to_json,
       headers: api_headers
     assert_response :accepted
     body = response.parsed_body
     assert body["accepted"]
-    assert_not_nil body["log_id"]
+    assert body["log_id"].present?
+  end
+
+  test "POST /log enqueues ScoreOutputJob" do
+    Scorer.create!(project: projects(:playground), name: "log-test-scorer", scorer_type: :exact_match, content: "match")
+
+    assert_enqueued_with(job: ScoreOutputJob) do
+      post log_api_v1_prompt_path(slug: "doc-summarizer"),
+        params: { output: "test output" }.to_json,
+        headers: api_headers
+    end
+  end
+
+  test "POST /log with experiment assigns variant" do
+    exp = Experiment.create!(
+      prompt: prompts(:doc_summarizer), name: "log-variant-test",
+      variant_a_version: prompt_versions(:doc_summarizer_production),
+      variant_b_version: prompt_versions(:doc_summarizer_dev),
+      status: :running, started_at: Time.current
+    )
+
+    Promptly::Redis.with do |redis|
+      redis.set(Promptly::Redis.key("exp", exp.id, "req", "variant-req"), "b")
+    end
+
+    post log_api_v1_prompt_path(slug: "doc-summarizer"),
+      params: { output: "variant output", request_id: "variant-req" }.to_json,
+      headers: api_headers
+    assert_response :accepted
+
+    log = Log.find(response.parsed_body["log_id"])
+    assert_equal exp.id, log.experiment_id
+    assert_equal "b", log.variant
   end
 
   # --- X-Promptly-Key alternative auth ---

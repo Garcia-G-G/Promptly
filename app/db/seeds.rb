@@ -19,6 +19,27 @@ project = Project.find_or_create_by!(workspace: workspace, slug: "playground") d
   p.name = "Playground"
 end
 
+scorer = Scorer.find_or_create_by!(project: project, name: "default-quality") do |s|
+  s.scorer_type = :llm_judge
+  s.content = <<~PROMPT
+    You are an output quality evaluator. Score the following LLM output on three dimensions:
+    1. Quality — is the output well-written, clear, and complete?
+    2. Relevance — does the output address the prompt accurately?
+    3. Helpfulness — would a user find this output useful?
+
+    Return ONLY valid JSON with no additional text:
+    {"score": 0.0, "rationale": "one sentence explanation"}
+
+    The score must be a float between 0.0 and 1.0 where:
+    - 0.0–0.3 = poor
+    - 0.3–0.6 = acceptable
+    - 0.6–0.8 = good
+    - 0.8–1.0 = excellent
+  PROMPT
+  s.model_hint = "claude-sonnet-4-6"
+end
+puts "  Scorer: #{scorer.name} (#{scorer.scorer_type})"
+
 # Prompt + versions
 prompt = Prompt.find_or_create_by!(project: project, slug: "doc-summarizer") do |p|
   p.description = "Summarizes documents in the specified language and format"
