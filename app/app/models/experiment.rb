@@ -6,6 +6,8 @@ class Experiment < ApplicationRecord
   belongs_to :variant_b_version, class_name: "PromptVersion"
   belongs_to :winner_version, class_name: "PromptVersion", optional: true
 
+  has_many :experiment_results, dependent: :destroy
+
   enum :status, { draft: "draft", running: "running", paused: "paused", concluded: "concluded" }
 
   validates :name, presence: true, uniqueness: { scope: :prompt_id }

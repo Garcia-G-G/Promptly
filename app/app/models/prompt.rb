@@ -3,6 +3,8 @@ class Prompt < ApplicationRecord
 
   has_many :prompt_versions, dependent: :destroy
   has_many :experiments, dependent: :destroy
+  has_many :logs, dependent: :destroy
+  belongs_to :default_scorer, class_name: "Scorer", optional: true
 
   normalizes :slug, with: -> { _1.strip.downcase }
 

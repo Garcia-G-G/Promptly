@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_14_215826) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_15_205203) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -25,6 +25,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_14_215826) do
     t.bigint "workspace_id", null: false
     t.index ["key_digest"], name: "index_api_keys_on_key_digest", unique: true
     t.index ["workspace_id"], name: "index_api_keys_on_workspace_id"
+  end
+
+  create_table "experiment_results", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "experiment_id", null: false
+    t.bigint "log_id", null: false
+    t.float "score"
+    t.string "variant", null: false
+    t.index ["experiment_id", "variant", "created_at"], name: "idx_experiment_results_variant"
+    t.index ["experiment_id"], name: "index_experiment_results_on_experiment_id"
+    t.index ["log_id"], name: "index_experiment_results_on_log_id"
   end
 
   create_table "experiments", force: :cascade do |t|
@@ -48,6 +59,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_14_215826) do
     t.index ["variant_a_version_id"], name: "index_experiments_on_variant_a_version_id"
     t.index ["variant_b_version_id"], name: "index_experiments_on_variant_b_version_id"
     t.index ["winner_version_id"], name: "index_experiments_on_winner_version_id"
+  end
+
+  create_table "logs", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "experiment_id"
+    t.jsonb "input_vars", default: {}, null: false
+    t.integer "latency_ms"
+    t.string "model_version"
+    t.string "otel_span_id"
+    t.string "otel_trace_id"
+    t.text "output", null: false
+    t.bigint "project_id", null: false
+    t.bigint "prompt_id", null: false
+    t.bigint "prompt_version_id", null: false
+    t.string "request_id"
+    t.float "score"
+    t.text "score_rationale"
+    t.bigint "scorer_id"
+    t.jsonb "tokens", default: {}, null: false
+    t.string "variant"
+    t.index ["experiment_id", "variant", "created_at"], name: "idx_logs_experiment_variant", where: "(experiment_id IS NOT NULL)"
+    t.index ["experiment_id"], name: "index_logs_on_experiment_id"
+    t.index ["project_id"], name: "index_logs_on_project_id"
+    t.index ["prompt_id", "created_at"], name: "index_logs_on_prompt_id_and_created_at"
+    t.index ["prompt_id"], name: "index_logs_on_prompt_id"
+    t.index ["prompt_version_id"], name: "index_logs_on_prompt_version_id"
+    t.index ["request_id"], name: "idx_logs_request_id", where: "(request_id IS NOT NULL)"
+    t.index ["scorer_id"], name: "index_logs_on_scorer_id"
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -93,12 +132,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_14_215826) do
 
   create_table "prompts", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.bigint "default_scorer_id"
     t.text "description"
     t.bigint "project_id", null: false
     t.string "slug", null: false
     t.datetime "updated_at", null: false
+    t.index ["default_scorer_id"], name: "index_prompts_on_default_scorer_id"
     t.index ["project_id", "slug"], name: "index_prompts_on_project_id_and_slug", unique: true
     t.index ["project_id"], name: "index_prompts_on_project_id"
+  end
+
+  create_table "scorers", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.string "model_hint", default: "claude-sonnet-4-6", null: false
+    t.string "name", null: false
+    t.bigint "project_id", null: false
+    t.string "scorer_type", default: "llm_judge", null: false
+    t.datetime "updated_at", null: false
+    t.integer "version_number", default: 1, null: false
+    t.index ["project_id", "name"], name: "index_scorers_on_project_id_and_name", unique: true
+    t.index ["project_id"], name: "index_scorers_on_project_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -133,10 +188,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_14_215826) do
   end
 
   add_foreign_key "api_keys", "workspaces"
+  add_foreign_key "experiment_results", "experiments"
+  add_foreign_key "experiment_results", "logs"
   add_foreign_key "experiments", "prompt_versions", column: "variant_a_version_id"
   add_foreign_key "experiments", "prompt_versions", column: "variant_b_version_id"
   add_foreign_key "experiments", "prompt_versions", column: "winner_version_id"
   add_foreign_key "experiments", "prompts"
+  add_foreign_key "logs", "experiments"
+  add_foreign_key "logs", "projects"
+  add_foreign_key "logs", "prompt_versions"
+  add_foreign_key "logs", "prompts"
+  add_foreign_key "logs", "scorers"
   add_foreign_key "memberships", "users"
   add_foreign_key "memberships", "workspaces"
   add_foreign_key "projects", "workspaces"
@@ -144,5 +206,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_14_215826) do
   add_foreign_key "prompt_versions", "prompts"
   add_foreign_key "prompt_versions", "users", column: "created_by_id"
   add_foreign_key "prompts", "projects"
+  add_foreign_key "prompts", "scorers", column: "default_scorer_id", validate: false
+  add_foreign_key "scorers", "projects"
   add_foreign_key "workspaces", "users", column: "owner_id"
 end
