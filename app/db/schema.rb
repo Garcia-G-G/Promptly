@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_15_205203) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_16_144316) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -25,6 +25,59 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_15_205203) do
     t.bigint "workspace_id", null: false
     t.index ["key_digest"], name: "index_api_keys_on_key_digest", unique: true
     t.index ["workspace_id"], name: "index_api_keys_on_workspace_id"
+  end
+
+  create_table "dataset_rows", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "dataset_id", null: false
+    t.text "expected_output"
+    t.jsonb "input_vars", default: {}, null: false
+    t.jsonb "tags", default: [], null: false
+    t.datetime "updated_at", null: false
+    t.index ["dataset_id"], name: "index_dataset_rows_on_dataset_id"
+  end
+
+  create_table "datasets", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "name", null: false
+    t.bigint "project_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "name"], name: "index_datasets_on_project_id_and_name", unique: true
+    t.index ["project_id"], name: "index_datasets_on_project_id"
+  end
+
+  create_table "eval_run_results", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "dataset_row_id", null: false
+    t.text "error_message"
+    t.bigint "eval_run_id", null: false
+    t.integer "latency_ms"
+    t.text "output"
+    t.float "score"
+    t.text "score_rationale"
+    t.index ["dataset_row_id"], name: "index_eval_run_results_on_dataset_row_id"
+    t.index ["eval_run_id"], name: "index_eval_run_results_on_eval_run_id"
+  end
+
+  create_table "eval_runs", force: :cascade do |t|
+    t.float "aggregate_score"
+    t.datetime "created_at", null: false
+    t.bigint "dataset_id", null: false
+    t.text "error_message"
+    t.datetime "finished_at"
+    t.float "pass_rate"
+    t.float "pass_threshold", default: 0.6, null: false
+    t.bigint "prompt_version_id", null: false
+    t.integer "scored_rows", default: 0, null: false
+    t.bigint "scorer_id", null: false
+    t.datetime "started_at"
+    t.string "status", default: "queued", null: false
+    t.integer "total_rows", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["dataset_id"], name: "index_eval_runs_on_dataset_id"
+    t.index ["prompt_version_id"], name: "index_eval_runs_on_prompt_version_id"
+    t.index ["scorer_id"], name: "index_eval_runs_on_scorer_id"
   end
 
   create_table "experiment_results", force: :cascade do |t|
@@ -156,6 +209,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_15_205203) do
     t.index ["project_id"], name: "index_scorers_on_project_id"
   end
 
+  create_table "security_scans", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.jsonb "findings", default: [], null: false
+    t.datetime "finished_at"
+    t.bigint "prompt_version_id", null: false
+    t.datetime "started_at"
+    t.string "status", default: "queued", null: false
+    t.datetime "updated_at", null: false
+    t.index ["prompt_version_id"], name: "index_security_scans_on_prompt_version_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "confirmation_sent_at"
     t.string "confirmation_token"
@@ -188,6 +252,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_15_205203) do
   end
 
   add_foreign_key "api_keys", "workspaces"
+  add_foreign_key "dataset_rows", "datasets"
+  add_foreign_key "datasets", "projects"
+  add_foreign_key "eval_run_results", "dataset_rows"
+  add_foreign_key "eval_run_results", "eval_runs"
+  add_foreign_key "eval_runs", "datasets"
+  add_foreign_key "eval_runs", "prompt_versions"
+  add_foreign_key "eval_runs", "scorers"
   add_foreign_key "experiment_results", "experiments"
   add_foreign_key "experiment_results", "logs"
   add_foreign_key "experiments", "prompt_versions", column: "variant_a_version_id"
@@ -208,5 +279,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_15_205203) do
   add_foreign_key "prompts", "projects"
   add_foreign_key "prompts", "scorers", column: "default_scorer_id", validate: false
   add_foreign_key "scorers", "projects"
+  add_foreign_key "security_scans", "prompt_versions"
   add_foreign_key "workspaces", "users", column: "owner_id"
 end

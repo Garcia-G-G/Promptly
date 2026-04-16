@@ -6,6 +6,9 @@ class PromptVersion < ApplicationRecord
   belongs_to :created_by, class_name: "User", optional: true
 
   enum :environment, { dev: "dev", staging: "staging", production: "production", archived: "archived" }
+  has_many :security_scans, dependent: :destroy
+  has_many :eval_runs, dependent: :destroy
+
   enum :created_via, { sdk: "sdk", ui: "ui", api: "api" }, prefix: :via
 
   validates :content, presence: true
