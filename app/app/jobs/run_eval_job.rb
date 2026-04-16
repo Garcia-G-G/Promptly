@@ -13,14 +13,16 @@ class RunEvalJob < ApplicationJob
     prompt_content = eval_run.prompt_version.content
     scorer = eval_run.scorer
 
-    eval_run.dataset.dataset_rows.find_each.each_slice(10) do |batch|
-      batch.each do |row|
-        process_row(eval_run, row, prompt_content, scorer)
-      end
+    # Skip rows already processed (idempotent on retry)
+    processed_row_ids = eval_run.eval_run_results.pluck(:dataset_row_id).to_set
+
+    eval_run.dataset.dataset_rows.find_each do |row|
+      next if processed_row_ids.include?(row.id)
+      process_row(eval_run, row, prompt_content, scorer)
     end
 
     EvalRuns::Complete.call(eval_run: eval_run)
-  rescue => e
+  rescue StandardError => e
     eval_run&.update!(status: :failed, error_message: e.message, finished_at: Time.current)
     raise if e.is_a?(Anthropic::Errors::APIError)
   end
@@ -51,7 +53,7 @@ class RunEvalJob < ApplicationJob
       score_rationale: rationale,
       latency_ms: latency
     )
-  rescue => e
+  rescue StandardError => e
     EvalRunResult.create!(
       eval_run: eval_run,
       dataset_row: row,
@@ -69,7 +71,7 @@ class RunEvalJob < ApplicationJob
       messages: [ { role: "user", content: prompt_content } ]
     )
     response.content.first.text
-  rescue => e
+  rescue StandardError => e
     Rails.logger.warn("RunEvalJob generate_output failed: #{e.message}")
     nil
   end

@@ -36,10 +36,19 @@ module Scoring
       [ match ? 1.0 : 0.0, match ? "exact match" : "no match" ]
     end
 
+    MAX_REGEX_LENGTH = 500
+
     def self.score_regex(scorer, output)
-      pattern = Regexp.new(scorer.content.to_s)
+      raw_pattern = scorer.content.to_s
+      if raw_pattern.length > MAX_REGEX_LENGTH
+        return [ nil, "regex too long (max #{MAX_REGEX_LENGTH} chars)" ]
+      end
+
+      pattern = Regexp.new(raw_pattern, timeout: 1.0)
       match = pattern.match?(output.to_s)
       [ match ? 1.0 : 0.0, match ? "regex matched" : "regex did not match" ]
+    rescue Regexp::TimeoutError
+      [ nil, "regex timed out (possible catastrophic backtracking)" ]
     rescue RegexpError => e
       [ nil, "invalid regex: #{e.message}" ]
     end

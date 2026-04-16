@@ -5,14 +5,16 @@ class Rack::Attack
   end
 
   # Per-API-key throttle (more granular than IP)
+  # Uses a truncated hash of the key as discriminator to avoid leaking raw keys
   throttle("api/key", limit: 300, period: 60) do |req|
     if req.path.start_with?("/api/")
-      auth = req.env["HTTP_AUTHORIZATION"]
-      if auth&.start_with?("Bearer ")
-        auth.delete_prefix("Bearer ").strip
+      raw_key = if req.env["HTTP_AUTHORIZATION"]&.start_with?("Bearer ")
+        req.env["HTTP_AUTHORIZATION"].delete_prefix("Bearer ").strip
       else
         req.env["HTTP_X_PROMPTLY_KEY"]
       end
+
+      Digest::SHA256.hexdigest(raw_key.to_s)[0, 16] if raw_key.present?
     end
   end
 
