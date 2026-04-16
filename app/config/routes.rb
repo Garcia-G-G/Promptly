@@ -27,6 +27,16 @@ Rails.application.routes.draw do
       end
 
       resources :scorers, only: [ :index, :create, :update, :destroy ]
+
+      resources :datasets, only: [ :index, :create, :show, :destroy ] do
+        post :rows, on: :member, action: :import_rows
+      end
+
+      resources :eval_runs, only: [ :index, :show, :create ]
+
+      resources :prompt_versions, only: [] do
+        resource :security_scan, only: [ :show, :create ]
+      end
     end
   end
 
