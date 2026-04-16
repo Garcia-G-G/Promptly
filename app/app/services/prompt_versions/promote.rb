@@ -1,10 +1,19 @@
 module PromptVersions
   class Promote
-    def self.call(prompt_version:, to_environment:)
+    def self.call(prompt_version:, to_environment:, force: false)
       to_env = to_environment.to_s
 
       unless %w[staging production].include?(to_env)
         raise ArgumentError, "Cannot promote to #{to_env}"
+      end
+
+      # Security gate for production
+      if to_env == "production" && !force
+        check = SecurityScans::Check.call(prompt_version: prompt_version)
+        unless check[:allowed]
+          raise PromptVersions::SecurityBlocked,
+            "Promotion blocked: security scan flagged issues. Override with force: true."
+        end
       end
 
       prompt = prompt_version.prompt

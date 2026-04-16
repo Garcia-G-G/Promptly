@@ -48,7 +48,8 @@ module Api
         version = @prompt.prompt_versions.find(params.require(:version_id))
         new_version = PromptVersions::Promote.call(
           prompt_version: version,
-          to_environment: params.require(:to_environment)
+          to_environment: params.require(:to_environment),
+          force: params[:force] == true || params[:force] == "true"
         )
         render json: Serializers::PromptVersionSerializer.call(new_version), status: :created
       end

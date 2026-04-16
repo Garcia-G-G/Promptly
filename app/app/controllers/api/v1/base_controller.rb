@@ -32,6 +32,10 @@ module Api
         render_error("invalid_argument", message: e.message, status: :unprocessable_entity)
       end
 
+      rescue_from PromptVersions::SecurityBlocked do |e|
+        render_error("security_blocked", message: e.message, status: :unprocessable_entity)
+      end
+
       private
 
       def render_error(code, message: nil, status: :internal_server_error, **extra)
