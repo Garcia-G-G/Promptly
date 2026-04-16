@@ -122,6 +122,53 @@ unless prompt.experiments.exists?(name: "tone-tweak")
   end
 end
 
+# Dataset with sample test cases
+dataset = Dataset.find_or_create_by!(project: project, name: "summarizer-test-cases") do |d|
+  d.description = "Test cases for the doc-summarizer prompt"
+end
+
+if dataset.dataset_rows.count == 0
+  Datasets::ImportRows.call(dataset: dataset, rows: [
+    { input_vars: { "language" => "Spanish", "length" => "3 bullets", "document" => "Ruby is a programming language." }, expected_output: "Spanish summary in 3 bullets", tags: [ "core" ] },
+    { input_vars: { "language" => "English", "length" => "1 paragraph", "document" => "Rails is a web framework." }, tags: [ "core" ] },
+    { input_vars: { "language" => "French", "length" => "5 bullets", "document" => "PostgreSQL is a database." }, tags: [ "i18n" ] },
+    { input_vars: { "language" => "English", "length" => "3 bullets", "document" => "" }, tags: [ "edge-case" ] },
+    { input_vars: { "language" => "Japanese", "length" => "1 sentence", "document" => "Redis is an in-memory store." }, tags: [ "i18n" ] }
+  ])
+end
+puts "  Dataset: #{dataset.name} (#{dataset.dataset_rows.count} rows)"
+
+# Pre-computed eval run (don't call Claude in seeds)
+prod_version = prompt.prompt_versions.find_by(environment: "production")
+if prod_version && !EvalRun.exists?(prompt_version: prod_version, dataset: dataset)
+  eval_run = EvalRun.create!(
+    prompt_version: prod_version,
+    dataset: dataset,
+    scorer: scorer,
+    status: :done,
+    aggregate_score: 0.78,
+    pass_rate: 0.80,
+    pass_threshold: 0.6,
+    total_rows: 5,
+    scored_rows: 5,
+    started_at: 1.hour.ago,
+    finished_at: 30.minutes.ago
+  )
+  puts "  EvalRun: #{eval_run.status} (score: #{eval_run.aggregate_score})"
+end
+
+# Security scan for production version
+if prod_version && !SecurityScan.exists?(prompt_version: prod_version)
+  SecurityScan.create!(
+    prompt_version: prod_version,
+    status: :clean,
+    findings: [],
+    started_at: 1.hour.ago,
+    finished_at: 1.hour.ago
+  )
+  puts "  SecurityScan: clean"
+end
+
 puts "Seeding complete."
 puts "  Owner: #{owner.email}"
 puts "  Workspace: #{workspace.slug}"

@@ -237,4 +237,25 @@ class Api::V1::PromptsControllerTest < ActionDispatch::IntegrationTest
       headers: api_headers
     assert_response :unprocessable_entity
   end
+
+  test "POST /prompts/:slug/promote to production blocked by flagged scan" do
+    version = prompt_versions(:doc_summarizer_dev)
+    SecurityScan.create!(prompt_version: version, status: :flagged, findings: [ { "type" => "injection" } ])
+
+    post promote_api_v1_prompt_path(slug: "doc-summarizer"),
+      params: { version_id: version.id, to_environment: "production" }.to_json,
+      headers: api_headers
+    assert_response :unprocessable_entity
+    assert_equal "security_blocked", response.parsed_body["error"]
+  end
+
+  test "POST /prompts/:slug/promote to production with force bypasses scan" do
+    version = prompt_versions(:doc_summarizer_dev)
+    SecurityScan.create!(prompt_version: version, status: :flagged, findings: [ { "type" => "injection" } ])
+
+    post promote_api_v1_prompt_path(slug: "doc-summarizer"),
+      params: { version_id: version.id, to_environment: "production", force: true }.to_json,
+      headers: api_headers
+    assert_response :created
+  end
 end

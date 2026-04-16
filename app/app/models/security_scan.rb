@@ -7,13 +7,13 @@ class SecurityScan < ApplicationRecord
     { pattern: /act\s+as\s+(if\s+you\s+are\s+)?a\s+different/i, type: "role_override", severity: "medium" },
     { pattern: /system\s*prompt/i, type: "prompt_leak", severity: "medium" },
     { pattern: /reveal\s+(your|the)\s+(system|original)\s+prompt/i, type: "prompt_leak", severity: "high" },
-    { pattern: /\b(BEGIN|END)\s+INSTRUCTIONS\b/, type: "boundary_marker", severity: "low" },
+    { pattern: /\b(BEGIN|END)\s+INSTRUCTIONS\b/, type: "boundary_marker", severity: "low" }
   ].freeze
 
   PII_PATTERNS = [
     { pattern: /\b\d{3}-\d{2}-\d{4}\b/, type: "pii_ssn", severity: "high" },
     { pattern: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i, type: "pii_email", severity: "medium" },
-    { pattern: /\b\d{16}\b/, type: "pii_credit_card", severity: "high" },
+    { pattern: /\b\d{16}\b/, type: "pii_credit_card", severity: "high" }
   ].freeze
 
   ALL_PATTERNS = (INJECTION_PATTERNS + PII_PATTERNS).freeze
