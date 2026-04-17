@@ -1,0 +1,26 @@
+<% content_for :page_title, "Prompts" %>
+
+<div class="page-header">
+  <h1>Prompts</h1>
+  <p><%= @prompts.count %> prompts across all projects</p>
+</div>
+
+<div class="prompt-grid">
+  <% @prompts.each do |prompt| %>
+    <% prod_version = prompt.prompt_versions.find { |v| v.environment == "production" } %>
+    <% dev_version = prompt.prompt_versions.find { |v| v.environment == "dev" } %>
+    <%= link_to workspace_web_prompt_path(@workspace.slug, prompt.slug), class: "prompt-card card", style: "text-decoration: none; color: inherit;", data: { controller: "tilt", action: "mousemove->tilt#mousemove mouseleave->tilt#mouseleave" } do %>
+      <div class="prompt-card__slug"><%= prompt.slug %></div>
+      <div class="prompt-card__desc"><%= prompt.description || "No description" %></div>
+      <div class="prompt-card__meta">
+        <% if prod_version %>
+          <span class="badge badge--green">prod v<%= prod_version.version_number %></span>
+        <% end %>
+        <% if dev_version %>
+          <span class="badge badge--blue">dev v<%= dev_version.version_number %></span>
+        <% end %>
+        <span style="font-size: 12px; color: var(--t3);"><%= prompt.project.name %></span>
+      </div>
+    <% end %>
+  <% end %>
+</div>

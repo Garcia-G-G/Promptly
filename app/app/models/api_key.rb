@@ -1,7 +1,7 @@
 class ApiKey < ApplicationRecord
   belongs_to :workspace
 
-  validates :name, presence: true
+  validates :name, presence: true, length: { maximum: 255 }
   validates :key_prefix, presence: true
   validates :key_digest, presence: true, uniqueness: true
 

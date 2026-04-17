@@ -1,0 +1,9 @@
+owner_demo:
+  workspace: demo
+  user: owner
+  role: owner
+
+dev_demo:
+  workspace: demo
+  user: developer
+  role: developer

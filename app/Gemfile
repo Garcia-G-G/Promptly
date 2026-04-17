@@ -49,6 +49,10 @@ gem "anthropic"
 # Observability
 gem "opentelemetry-sdk"
 gem "opentelemetry-instrumentation-rails"
+gem "opentelemetry-exporter-otlp"
+gem "opentelemetry-instrumentation-pg"
+gem "opentelemetry-instrumentation-net_http"
+gem "opentelemetry-instrumentation-redis"
 
 # Security & rate limiting
 gem "rack-attack"
@@ -56,6 +60,7 @@ gem "secure_headers"
 
 # Redis (A/B router only — not for jobs/cache/cable)
 gem "redis"
+gem "connection_pool"
 
 # Database safety
 gem "strong_migrations"
@@ -90,4 +95,5 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  gem "mock_redis"
 end
