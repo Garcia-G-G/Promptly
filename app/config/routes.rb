@@ -5,6 +5,13 @@ Rails.application.routes.draw do
 
   resources :workspaces, param: :slug, only: [ :new, :create, :show ] do
     resources :projects, param: :slug, only: [ :index, :show, :new, :create ]
+
+    # Web dashboard
+    namespace :web do
+      resources :prompts, only: [ :index, :show ], param: :id do
+        get :diff, on: :member
+      end
+    end
   end
 
   namespace :api do

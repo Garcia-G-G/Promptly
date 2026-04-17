@@ -1,0 +1,73 @@
+<% content_for :page_title, @prompt.slug %>
+
+<div class="page-header">
+  <%= link_to "&larr; Prompts".html_safe, workspace_web_prompts_path(@workspace.slug), style: "font-size: 13px; color: var(--t3); text-decoration: none;" %>
+  <h1 style="font-family: var(--font-mono);"><%= @prompt.slug %></h1>
+  <p><%= @prompt.description %></p>
+</div>
+
+<div class="env-grid">
+  <% %w[production staging dev].each do |env| %>
+    <% version = @versions_by_env[env] %>
+    <div class="env-card env-card--<%= env %>">
+      <div class="env-card__bar"></div>
+      <div style="padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge badge--<%= env == 'production' ? 'green' : env == 'staging' ? 'amber' : 'blue' %>"><%= env %></span>
+          <% if version %>
+            <span style="font-family: var(--font-mono); font-size: 12px; color: var(--t3);">v<%= version.version_number %></span>
+          <% end %>
+        </div>
+        <% if version %>
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--t3); margin-top: 8px;">
+            <%= version.content_hash[0..11] %>
+          </div>
+          <div style="font-size: 12px; color: var(--t3); margin-top: 4px;">
+            <%= time_ago_in_words(version.created_at) %> ago
+          </div>
+        <% else %>
+          <div style="font-size: 13px; color: var(--t3); margin-top: 8px;">No version</div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if @current_version %>
+  <div style="margin-top: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2 style="font-size: 16px; font-weight: 600;">Prompt Content</h2>
+      <% if @prompt.prompt_versions.count > 1 %>
+        <%= link_to "View diff &rarr;".html_safe, diff_workspace_web_prompt_path(@workspace.slug, @prompt.slug), class: "btn btn--secondary btn--sm" %>
+      <% end %>
+    </div>
+
+    <div class="prompt-content">
+      <% @current_version.content.split("\n").each_with_index do |line, i| %>
+        <div class="prompt-content__line">
+          <span class="prompt-content__num"><%= i + 1 %></span>
+          <span class="prompt-content__text"><%= line.gsub(/\{(\w+)\}/) { "<span style='color: var(--accent); font-weight: 500;'>{#{$1}}</span>" }.html_safe %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @current_version.variables.any? %>
+    <div style="margin-top: 20px;">
+      <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 10px;">Variables</h3>
+      <div class="env-grid">
+        <% @current_version.variables.each do |var| %>
+          <div class="card card--flat" style="padding: 14px;">
+            <div style="font-family: var(--font-mono); font-size: 13px; font-weight: 600;"><%= var["name"] %></div>
+            <% if var["description"] %>
+              <div style="font-size: 12px; color: var(--t2); margin-top: 4px;"><%= var["description"] %></div>
+            <% end %>
+            <% if var["default"] && !var["default"].empty? %>
+              <div style="font-size: 11px; color: var(--t3); margin-top: 4px;">Default: <code><%= var["default"] %></code></div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+<% end %>
