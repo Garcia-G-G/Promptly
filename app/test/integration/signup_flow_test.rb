@@ -42,6 +42,6 @@ class SignupFlowTest < ActionDispatch::IntegrationTest
 
     # Should be on the workspace dashboard
     assert_response :success
-    assert_select "h1", "My Workspace"
+    assert_select "h1", "Overview"
   end
 end

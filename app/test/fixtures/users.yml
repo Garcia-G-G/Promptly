@@ -1,13 +1,11 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+owner:
+  email: "owner@test.com"
+  encrypted_password: <%= Devise::Encryptor.digest(User, "password123456") %>
+  name: "Test Owner"
+  confirmed_at: <%= Time.current %>
 
-one:
-  email: one@example.com
-  encrypted_password: "$2a$12$1XtwWw90PM.zfWZE2r7RL.54NqLWRh2iuFQ.WJQLSBCQJ0yx/jQC."
-  name: User One
-  confirmed_at: "2026-01-01 00:00:00"
-
-two:
-  email: two@example.com
-  encrypted_password: "$2a$12$1XtwWw90PM.zfWZE2r7RL.54NqLWRh2iuFQ.WJQLSBCQJ0yx/jQC."
-  name: User Two
-  confirmed_at: "2026-01-01 00:00:00"
+developer:
+  email: "dev@test.com"
+  encrypted_password: <%= Devise::Encryptor.digest(User, "password123456") %>
+  name: "Test Developer"
+  confirmed_at: <%= Time.current %>
