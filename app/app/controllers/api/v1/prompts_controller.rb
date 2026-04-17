@@ -1,6 +1,8 @@
 module Api
   module V1
     class PromptsController < BaseController
+      include OtelTraceable
+
       before_action :set_current_project
       before_action :set_prompt, only: [ :show, :resolve, :promote, :log ]
 
@@ -41,6 +43,14 @@ module Api
           response.headers["X-Promptly-Variant"] = (result[:variant] || "baseline").to_s
         end
 
+        trace_resolve(result[:prompt], version, experiment: result[:experiment], variant: result[:variant])
+
+        span = OpenTelemetry::Trace.current_span rescue nil
+        if span&.context&.valid?
+          response.headers["X-Trace-Id"] = span.context.hex_trace_id
+          response.headers["X-Span-Id"] = span.context.hex_span_id
+        end
+
         render json: Serializers::ResolveSerializer.call(version)
       end
 
@@ -60,6 +70,7 @@ module Api
           project: current_project,
           params: log_params
         )
+        trace_log(@prompt, log_record)
         render json: { accepted: true, log_id: log_record.id }, status: :accepted
       end
 

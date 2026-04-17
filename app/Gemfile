@@ -49,6 +49,10 @@ gem "anthropic"
 # Observability
 gem "opentelemetry-sdk"
 gem "opentelemetry-instrumentation-rails"
+gem "opentelemetry-exporter-otlp"
+gem "opentelemetry-instrumentation-pg"
+gem "opentelemetry-instrumentation-net_http"
+gem "opentelemetry-instrumentation-redis"
 
 # Security & rate limiting
 gem "rack-attack"
