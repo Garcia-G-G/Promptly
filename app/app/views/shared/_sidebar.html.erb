@@ -1,0 +1,29 @@
+<aside class="sidebar">
+  <div class="sidebar__logo">
+    <div class="sidebar__logo-icon">P</div>
+    <span class="sidebar__logo-text">Promptly</span>
+  </div>
+
+  <div class="sidebar__workspace-selector">
+    <span><%= current_workspace.name %></span>
+    <span class="sidebar__caret">&#8964;</span>
+  </div>
+
+  <nav class="sidebar__nav">
+    <%= sidebar_link "Overview", "&#9707;", workspace_path(current_workspace.slug) %>
+    <%= sidebar_link "Prompts", "&#9109;", workspace_projects_path(current_workspace.slug) %>
+  </nav>
+
+  <div class="sidebar__spacer"></div>
+
+  <div class="sidebar__bottom">
+    <div class="sidebar__status">
+      <div class="sidebar__status-dot"></div>
+      <span>All systems nominal</span>
+    </div>
+    <div class="sidebar__user">
+      <div class="sidebar__user-avatar"><%= current_user.name.to_s.first&.upcase || "?" %></div>
+      <span><%= current_user.name %></span>
+    </div>
+  </div>
+</aside>
