@@ -2,9 +2,12 @@ module Api
   module V1
     class PromptsController < BaseController
       include OtelTraceable
+      include PlanEnforceable
 
       before_action :set_current_project
       before_action :set_prompt, only: [ :show, :resolve, :promote, :log ]
+      before_action :enforce_sdk_call_limit!, only: [ :resolve ]
+      after_action :report_sdk_usage!, only: [ :resolve ]
 
       def index
         prompts = current_project.prompts.order(:slug)

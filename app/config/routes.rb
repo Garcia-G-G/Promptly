@@ -15,6 +15,10 @@ Rails.application.routes.draw do
   end
 
   namespace :api do
+    namespace :webhooks do
+      post "stripe", to: "stripe#create"
+    end
+
     namespace :v1 do
       resources :prompts, param: :slug, only: [ :index, :create, :show ] do
         member do
