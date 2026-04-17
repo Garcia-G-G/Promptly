@@ -4,10 +4,10 @@ class MarketingControllerTest < ActionDispatch::IntegrationTest
   test "landing page renders for unauthenticated users" do
     get root_path
     assert_response :success
-    assert_select "h1", /Version control/
-    assert_select ".landing-nav"
-    assert_select ".code-window"
-    assert_select ".feature-card", minimum: 6
-    assert_select ".pricing-card", minimum: 2
+    assert_select "h1"
+    assert_select ".nav"
+    assert_select ".terminal"
+    assert_select ".fcard", minimum: 3
+    assert_select ".pcard", minimum: 2
   end
 end

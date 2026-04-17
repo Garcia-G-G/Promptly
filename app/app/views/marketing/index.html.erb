@@ -1,149 +1,153 @@
-<!-- Nav -->
-<nav class="landing-nav reveal">
-  <a href="/" class="landing-nav__logo">
-    <div class="landing-nav__icon">P</div>
-    Promptly
+<%# Navigation — minimal, no borders, transparent %>
+<nav class="nav">
+  <a href="/" class="nav__logo">
+    <svg class="nav__mark" width="24" height="24" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#f97316"/><path d="M8 7h4.5a3.5 3.5 0 0 1 0 7H10v3.5H8V7z" fill="white"/></svg>
+    <span>Promptly</span>
   </a>
-  <div class="landing-nav__actions">
-    <%= link_to "Log in", new_user_session_path, class: "landing-nav__link" %>
-    <%= link_to "Get started", new_user_registration_path, class: "btn btn--primary" %>
+  <div class="nav__links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <%= link_to "Log in", new_user_session_path %>
   </div>
+  <%= link_to "Get started", new_user_registration_path, class: "nav__cta" %>
 </nav>
 
-<!-- Hero -->
+<%# Hero — product-first, code IS the hero %>
 <section class="hero">
-  <div class="reveal">
-    <span class="hero__badge">Now in public beta</span>
-  </div>
-  <h1 class="hero__title reveal reveal-d1">Version control for your LLM prompts</h1>
-  <p class="hero__subtitle reveal reveal-d2">Ship prompts like code. A/B test variants, track scores, and roll back — without redeploying your app.</p>
-  <div class="hero__actions reveal reveal-d3">
-    <%= link_to "Start free", new_user_registration_path, class: "btn btn--primary btn--lg" %>
-    <a href="#features" class="btn btn--secondary btn--lg">See how it works</a>
+  <p class="hero__eyebrow reveal">
+    <span class="hero__dot"></span>
+    Now in public beta
+  </p>
+
+  <h1 class="hero__h1 reveal reveal-d1">
+    Prompts are code.<br>
+    <em>Treat them that way.</em>
+  </h1>
+
+  <p class="hero__sub reveal reveal-d2">
+    Version, A/B test, score, and deploy your LLM prompts<br class="hide-mobile">
+    from one place your whole team can trust.
+  </p>
+
+  <div class="hero__buttons reveal reveal-d3">
+    <%= link_to "Start building — free", new_user_registration_path, class: "btn-accent" %>
+    <a href="#features" class="btn-ghost">See how it works &darr;</a>
   </div>
 
-  <!-- Code window -->
-  <div class="code-window reveal reveal-d4">
-    <div class="code-window__bar">
-      <div class="code-window__dots">
-        <div class="dot dot--red"></div>
-        <div class="dot dot--yellow"></div>
-        <div class="dot dot--green"></div>
-      </div>
-      <span class="code-window__filename">app.rb</span>
+  <%# The code window — this IS the product pitch %>
+  <div class="terminal reveal reveal-d4" data-controller="tilt" data-tilt-depth-value="2" data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
+    <div class="terminal__chrome">
+      <div class="terminal__dots"><i></i><i></i><i></i></div>
+      <span class="terminal__tab">app.rb</span>
     </div>
-    <div class="code-window__content">
-      <div><span class="line-num">1</span><span class="kw">require</span> <span class="str">"promptly"</span></div>
-      <div><span class="line-num">2</span></div>
-      <div><span class="line-num">3</span><span class="accent">Promptly</span>.configure <span class="kw">do</span> |c|</div>
-      <div><span class="line-num">4</span>  c.api_key = <span class="accent">ENV</span>[<span class="str">"PROMPTLY_KEY"</span>]</div>
-      <div><span class="line-num">5</span><span class="kw">end</span></div>
-      <div><span class="line-num">6</span></div>
-      <div><span class="line-num">7</span>prompt = <span class="accent">Promptly</span>.get(<span class="str">"onboarding-email"</span>)</div>
-      <div><span class="line-num">8</span>result = <span class="accent">Promptly</span>.log(prompt, output: resp)</div>
-    </div>
+    <pre class="terminal__code"><span class="ln"> 1</span>  <span class="kw">require</span> <span class="s">"promptly"</span>
+<span class="ln"> 2</span>
+<span class="ln"> 3</span>  <span class="c"># Resolve the active prompt — environment-aware,</span>
+<span class="ln"> 4</span>  <span class="c"># A/B routed, scored automatically.</span>
+<span class="ln"> 5</span>  prompt = <span class="v">Promptly</span>.get(<span class="s">"onboarding-email"</span>)
+<span class="ln"> 6</span>
+<span class="ln"> 7</span>  result = anthropic.messages.create(
+<span class="ln"> 8</span>    model: prompt.<span class="v">model_hint</span>,
+<span class="ln"> 9</span>    messages: [{ role: <span class="s">"user"</span>, content: prompt.to_s }]
+<span class="ln">10</span>  )
+<span class="ln">11</span>
+<span class="ln">12</span>  <span class="v">Promptly</span>.log(prompt_slug: <span class="s">"onboarding-email"</span>, output: result)</pre>
   </div>
 </section>
 
-<!-- Features -->
+<%# Features — three big cards, not a long list %>
 <section class="features" id="features">
-  <div class="features__header reveal">
-    <span class="features__label">Features</span>
-    <h2>Everything you need to manage prompts at scale</h2>
-    <p>From first draft to production, one workflow.</p>
+  <div class="features__intro reveal">
+    <span class="tag">How it works</span>
+    <h2>Push. Test. Ship.</h2>
   </div>
 
-  <div class="features__list">
-    <div class="feature-card feature-card--left reveal">
-      <span class="feature-card__num">01</span>
-      <div>
-        <div class="feature-card__title">A/B Testing</div>
-        <p class="feature-card__desc">Split traffic between prompt variants with canary rollouts. Measure which version performs best before going to 100%.</p>
-      </div>
+  <div class="features__grid">
+    <div class="fcard reveal reveal-d1">
+      <div class="fcard__number">01</div>
+      <h3>Version everything</h3>
+      <p>Every prompt edit is an immutable version with a SHA-256 hash. Diff any two, roll back in one click. No more "which Slack message had the latest prompt?"</p>
     </div>
 
-    <div class="feature-card feature-card--right reveal reveal-d1">
-      <span class="feature-card__num">02</span>
-      <div>
-        <div class="feature-card__title">Version History</div>
-        <p class="feature-card__desc">Every edit creates an immutable version. Diff any two versions side-by-side and roll back in one click.</p>
-      </div>
+    <div class="fcard reveal reveal-d2">
+      <div class="fcard__number">02</div>
+      <h3>A/B test in production</h3>
+      <p>Split traffic between variants with sticky sessions. Canary from 1% to 100%. Bayesian significance testing declares winners — no spreadsheets required.</p>
     </div>
 
-    <div class="feature-card feature-card--left reveal reveal-d2">
-      <span class="feature-card__num">03</span>
-      <div>
-        <div class="feature-card__title">SDK & API</div>
-        <p class="feature-card__desc">Resolve prompts at runtime with the Ruby SDK or REST API. Variables are interpolated server-side, so your app stays clean.</p>
-      </div>
+    <div class="fcard reveal reveal-d3">
+      <div class="fcard__number">03</div>
+      <h3>Score every output</h3>
+      <p>Attach LLM-as-judge scorers or regex matchers. Run eval datasets before promoting. Security scans catch injection patterns before they reach production.</p>
     </div>
+  </div>
 
-    <div class="feature-card feature-card--right reveal reveal-d3">
-      <span class="feature-card__num">04</span>
-      <div>
-        <div class="feature-card__title">Automated Scoring</div>
-        <p class="feature-card__desc">Attach scorers that evaluate every LLM output automatically. Track quality over time with built-in analytics.</p>
+  <div class="features__detail reveal reveal-d4">
+    <div class="features__detail-list">
+      <div class="fdetail">
+        <span class="fdetail__label">Environments</span>
+        <span class="fdetail__value">dev &rarr; staging &rarr; production</span>
       </div>
-    </div>
-
-    <div class="feature-card feature-card--left reveal reveal-d4">
-      <span class="feature-card__num">05</span>
-      <div>
-        <div class="feature-card__title">Environments</div>
-        <p class="feature-card__desc">Promote prompt versions from staging to production independently. Each environment resolves its own pinned version.</p>
+      <div class="fdetail">
+        <span class="fdetail__label">Resolve p95</span>
+        <span class="fdetail__value">&lt; 8ms</span>
       </div>
-    </div>
-
-    <div class="feature-card feature-card--right reveal">
-      <span class="feature-card__num">06</span>
-      <div>
-        <div class="feature-card__title">Team Workspace</div>
-        <p class="feature-card__desc">Invite your team, manage roles, and collaborate on prompts in a shared workspace with full audit history.</p>
+      <div class="fdetail">
+        <span class="fdetail__label">SDK</span>
+        <span class="fdetail__value">Ruby (Python, JS coming)</span>
+      </div>
+      <div class="fdetail">
+        <span class="fdetail__label">Observability</span>
+        <span class="fdetail__value">OpenTelemetry GenAI native</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Pricing -->
+<%# Pricing — dead simple %>
 <section class="pricing" id="pricing">
-  <div class="pricing__header reveal">
-    <span class="features__label">Pricing</span>
-    <h2>Simple, transparent pricing</h2>
-    <p>Start free, upgrade when you need more.</p>
+  <div class="pricing__intro reveal">
+    <span class="tag">Pricing</span>
+    <h2>Start free. Scale later.</h2>
   </div>
 
-  <div class="pricing__grid">
-    <div class="pricing-card reveal">
-      <div class="pricing-card__name">Free</div>
-      <div class="pricing-card__price">$0 <span>/ month</span></div>
-      <div class="pricing-card__features">
-        <div class="pricing-card__feature"><span class="check">&#10003;</span> 3 projects</div>
-        <div class="pricing-card__feature"><span class="check">&#10003;</span> 10,000 resolves / mo</div>
-        <div class="pricing-card__feature"><span class="check">&#10003;</span> 2 team members</div>
-        <div class="pricing-card__feature"><span class="check">&#10003;</span> Community support</div>
-      </div>
-      <%= link_to "Get started", new_user_registration_path, class: "btn btn--secondary btn--full" %>
+  <div class="pricing__cards">
+    <div class="pcard reveal reveal-d1">
+      <div class="pcard__name">Free</div>
+      <div class="pcard__price">$0</div>
+      <ul class="pcard__list">
+        <li>3 projects</li>
+        <li>10k resolves / month</li>
+        <li>2 team members</li>
+        <li>Community support</li>
+      </ul>
+      <%= link_to "Get started", new_user_registration_path, class: "btn-ghost btn-ghost--full" %>
     </div>
 
-    <div class="pricing-card pricing-card--featured reveal reveal-d1">
-      <div class="pricing-card__name">Pro</div>
-      <div class="pricing-card__price">$49 <span>/ month</span></div>
-      <div class="pricing-card__features">
-        <div class="pricing-card__feature"><span class="check">&#10003;</span> Unlimited projects</div>
-        <div class="pricing-card__feature"><span class="check">&#10003;</span> Unlimited resolves</div>
-        <div class="pricing-card__feature"><span class="check">&#10003;</span> Unlimited members</div>
-        <div class="pricing-card__feature"><span class="check">&#10003;</span> Priority support</div>
-      </div>
-      <%= link_to "Start free trial", new_user_registration_path, class: "btn btn--primary btn--full" %>
+    <div class="pcard pcard--pro reveal reveal-d2">
+      <div class="pcard__badge">Most popular</div>
+      <div class="pcard__name">Pro</div>
+      <div class="pcard__price">$49<span>/mo</span></div>
+      <ul class="pcard__list">
+        <li>Unlimited projects</li>
+        <li>Unlimited resolves</li>
+        <li>Unlimited members</li>
+        <li>A/B testing + scoring</li>
+        <li>Security scans</li>
+        <li>Priority support</li>
+      </ul>
+      <%= link_to "Start free trial", new_user_registration_path, class: "btn-accent btn-accent--full" %>
     </div>
   </div>
 </section>
 
-<!-- Footer -->
-<footer class="landing-footer reveal">
-  <div class="landing-footer__logo">
-    <div class="landing-nav__icon landing-nav__icon--sm">P</div>
-    Promptly
+<%# Footer — barely there %>
+<footer class="foot">
+  <div class="foot__inner">
+    <span class="foot__brand">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#f97316"/><path d="M8 7h4.5a3.5 3.5 0 0 1 0 7H10v3.5H8V7z" fill="white"/></svg>
+      Promptly
+    </span>
+    <span class="foot__copy">&copy; <%= Date.current.year %></span>
   </div>
-  <p>&copy; <%= Date.current.year %> Promptly. All rights reserved.</p>
 </footer>
