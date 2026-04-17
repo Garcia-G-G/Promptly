@@ -20,6 +20,18 @@ class WorkspacesController < ApplicationController
   def show
     @workspace = current_workspace
     @projects = @workspace.projects.order(:name)
+    @prompts = Prompt.joins(:project)
+      .where(projects: { workspace_id: @workspace.id })
+      .includes(:prompt_versions, :project)
+      .order(updated_at: :desc)
+      .limit(10)
+    @experiments = Experiment.joins(prompt: { project: :workspace })
+      .where(workspaces: { id: @workspace.id })
+      .where(status: :running)
+    @recent_logs_count = Log.joins(project: :workspace)
+      .where(workspaces: { id: @workspace.id })
+      .where("logs.created_at > ?", 24.hours.ago)
+      .count
   end
 
   private

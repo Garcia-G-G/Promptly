@@ -1,9 +1,149 @@
-<h1>Promptly</h1>
-<p>Git + Vercel, but for your LLM prompts.</p>
+<!-- Nav -->
+<nav class="landing-nav reveal">
+  <a href="/" class="landing-nav__logo">
+    <div class="landing-nav__icon">P</div>
+    Promptly
+  </a>
+  <div class="landing-nav__actions">
+    <%= link_to "Log in", new_user_session_path, class: "landing-nav__link" %>
+    <%= link_to "Get started", new_user_registration_path, class: "btn btn--primary" %>
+  </div>
+</nav>
 
-<% if user_signed_in? %>
-  <%= link_to "New Workspace", new_workspace_path %>
-<% else %>
-  <%= link_to "Sign Up", new_user_registration_path %>
-  <%= link_to "Sign In", new_user_session_path %>
-<% end %>
+<!-- Hero -->
+<section class="hero">
+  <div class="reveal">
+    <span class="hero__badge">Now in public beta</span>
+  </div>
+  <h1 class="hero__title reveal reveal-d1">Version control for your LLM prompts</h1>
+  <p class="hero__subtitle reveal reveal-d2">Ship prompts like code. A/B test variants, track scores, and roll back — without redeploying your app.</p>
+  <div class="hero__actions reveal reveal-d3">
+    <%= link_to "Start free", new_user_registration_path, class: "btn btn--primary btn--lg" %>
+    <a href="#features" class="btn btn--secondary btn--lg">See how it works</a>
+  </div>
+
+  <!-- Code window -->
+  <div class="code-window reveal reveal-d4">
+    <div class="code-window__bar">
+      <div class="code-window__dots">
+        <div class="dot dot--red"></div>
+        <div class="dot dot--yellow"></div>
+        <div class="dot dot--green"></div>
+      </div>
+      <span class="code-window__filename">app.rb</span>
+    </div>
+    <div class="code-window__content">
+      <div><span class="line-num">1</span><span class="kw">require</span> <span class="str">"promptly"</span></div>
+      <div><span class="line-num">2</span></div>
+      <div><span class="line-num">3</span><span class="accent">Promptly</span>.configure <span class="kw">do</span> |c|</div>
+      <div><span class="line-num">4</span>  c.api_key = <span class="accent">ENV</span>[<span class="str">"PROMPTLY_KEY"</span>]</div>
+      <div><span class="line-num">5</span><span class="kw">end</span></div>
+      <div><span class="line-num">6</span></div>
+      <div><span class="line-num">7</span>prompt = <span class="accent">Promptly</span>.get(<span class="str">"onboarding-email"</span>)</div>
+      <div><span class="line-num">8</span>result = <span class="accent">Promptly</span>.log(prompt, output: resp)</div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features" id="features">
+  <div class="features__header reveal">
+    <span class="features__label">Features</span>
+    <h2>Everything you need to manage prompts at scale</h2>
+    <p>From first draft to production, one workflow.</p>
+  </div>
+
+  <div class="features__list">
+    <div class="feature-card feature-card--left reveal">
+      <span class="feature-card__num">01</span>
+      <div>
+        <div class="feature-card__title">A/B Testing</div>
+        <p class="feature-card__desc">Split traffic between prompt variants with canary rollouts. Measure which version performs best before going to 100%.</p>
+      </div>
+    </div>
+
+    <div class="feature-card feature-card--right reveal reveal-d1">
+      <span class="feature-card__num">02</span>
+      <div>
+        <div class="feature-card__title">Version History</div>
+        <p class="feature-card__desc">Every edit creates an immutable version. Diff any two versions side-by-side and roll back in one click.</p>
+      </div>
+    </div>
+
+    <div class="feature-card feature-card--left reveal reveal-d2">
+      <span class="feature-card__num">03</span>
+      <div>
+        <div class="feature-card__title">SDK & API</div>
+        <p class="feature-card__desc">Resolve prompts at runtime with the Ruby SDK or REST API. Variables are interpolated server-side, so your app stays clean.</p>
+      </div>
+    </div>
+
+    <div class="feature-card feature-card--right reveal reveal-d3">
+      <span class="feature-card__num">04</span>
+      <div>
+        <div class="feature-card__title">Automated Scoring</div>
+        <p class="feature-card__desc">Attach scorers that evaluate every LLM output automatically. Track quality over time with built-in analytics.</p>
+      </div>
+    </div>
+
+    <div class="feature-card feature-card--left reveal reveal-d4">
+      <span class="feature-card__num">05</span>
+      <div>
+        <div class="feature-card__title">Environments</div>
+        <p class="feature-card__desc">Promote prompt versions from staging to production independently. Each environment resolves its own pinned version.</p>
+      </div>
+    </div>
+
+    <div class="feature-card feature-card--right reveal">
+      <span class="feature-card__num">06</span>
+      <div>
+        <div class="feature-card__title">Team Workspace</div>
+        <p class="feature-card__desc">Invite your team, manage roles, and collaborate on prompts in a shared workspace with full audit history.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="pricing" id="pricing">
+  <div class="pricing__header reveal">
+    <span class="features__label">Pricing</span>
+    <h2>Simple, transparent pricing</h2>
+    <p>Start free, upgrade when you need more.</p>
+  </div>
+
+  <div class="pricing__grid">
+    <div class="pricing-card reveal">
+      <div class="pricing-card__name">Free</div>
+      <div class="pricing-card__price">$0 <span>/ month</span></div>
+      <div class="pricing-card__features">
+        <div class="pricing-card__feature"><span class="check">&#10003;</span> 3 projects</div>
+        <div class="pricing-card__feature"><span class="check">&#10003;</span> 10,000 resolves / mo</div>
+        <div class="pricing-card__feature"><span class="check">&#10003;</span> 2 team members</div>
+        <div class="pricing-card__feature"><span class="check">&#10003;</span> Community support</div>
+      </div>
+      <%= link_to "Get started", new_user_registration_path, class: "btn btn--secondary btn--full" %>
+    </div>
+
+    <div class="pricing-card pricing-card--featured reveal reveal-d1">
+      <div class="pricing-card__name">Pro</div>
+      <div class="pricing-card__price">$49 <span>/ month</span></div>
+      <div class="pricing-card__features">
+        <div class="pricing-card__feature"><span class="check">&#10003;</span> Unlimited projects</div>
+        <div class="pricing-card__feature"><span class="check">&#10003;</span> Unlimited resolves</div>
+        <div class="pricing-card__feature"><span class="check">&#10003;</span> Unlimited members</div>
+        <div class="pricing-card__feature"><span class="check">&#10003;</span> Priority support</div>
+      </div>
+      <%= link_to "Start free trial", new_user_registration_path, class: "btn btn--primary btn--full" %>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="landing-footer reveal">
+  <div class="landing-footer__logo">
+    <div class="landing-nav__icon landing-nav__icon--sm">P</div>
+    Promptly
+  </div>
+  <p>&copy; <%= Date.current.year %> Promptly. All rights reserved.</p>
+</footer>
