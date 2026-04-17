@@ -7,7 +7,7 @@
   --card-hover: #f5f5f4;
   --t1: #1c1917;
   --t2: #57534e;
-  --t3: #a8a29e;
+  --t3: #78716c;
   --accent: #ea580c;
   --accent-light: #fff7ed;
   --green: #16a34a;
@@ -23,6 +23,10 @@
   --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
   --radius: 12px;
   --radius-sm: 7px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+  --shadow-accent: 0 4px 14px rgba(234,88,12,0.25);
 }
 
 /* ── Reset ── */
@@ -35,6 +39,14 @@
 ::selection {
   background: var(--accent);
   color: var(--white);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+button:focus:not(:focus-visible), a:focus:not(:focus-visible) {
+  outline: none;
 }
 
 body {
@@ -362,10 +374,18 @@ body {
 .btn--primary {
   background: var(--accent);
   color: var(--white);
+  position: relative;
 }
 
 .btn--primary:hover {
-  background: #dc4e08;
+  background: #c2410c;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-accent);
+}
+
+.btn--primary:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .btn--secondary {
@@ -376,6 +396,8 @@ body {
 
 .btn--secondary:hover {
   background: var(--card-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn--sm {
@@ -390,11 +412,14 @@ body {
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
   padding: 20px;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: var(--shadow-sm);
 }
 
 .card:hover {
-  border-color: var(--t3);
+  border-color: var(--card-border);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .card--flat {
@@ -412,8 +437,9 @@ body {
   padding: 2px 8px;
   border-radius: 9999px;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   font-family: var(--font-mono);
+  letter-spacing: 0.02em;
 }
 
 .badge--green {
@@ -449,25 +475,29 @@ body {
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
   padding: 20px;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-sm);
 }
 
 .stat-card:hover {
   border-color: var(--t3);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .stat-card__label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--t3);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  font-weight: 500;
 }
 
 .stat-card__value {
-  font-size: 26px;
+  font-size: 28px;
   font-family: var(--font-mono);
   font-weight: 700;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 .stat-card__change {
@@ -752,8 +782,9 @@ input[type="number"]:focus,
 input[type="url"]:focus,
 textarea:focus,
 select:focus {
-  outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(234,88,12,0.1);
+  outline: none;
 }
 
 /* ── Data Table ── */
@@ -783,4 +814,54 @@ select:focus {
 
 .data-table tr:hover td {
   background: var(--card-hover);
+}
+
+/* ── Turbo Progress Bar ── */
+
+.turbo-progress-bar {
+  height: 2px;
+  background: var(--accent);
+}
+
+/* ── Skip Link (Accessibility) ── */
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: white;
+  z-index: 100;
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* ── Performance: skip rendering for off-screen content ── */
+
+.page-content > *:nth-child(n+4) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
+}
+
+/* ── Responsive Breakpoints ── */
+
+@media (max-width: 1024px) {
+  .sidebar { display: none; }
+  .main-content { margin-left: 0; }
+}
+
+@media (max-width: 768px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .prompt-grid { grid-template-columns: 1fr; }
+  .env-grid { grid-template-columns: 1fr; }
+  .diff-view { grid-template-columns: 1fr; }
+  .page-content { padding: 16px; }
+  .top-bar { padding: 12px 16px; }
+}
+
+@media (max-width: 480px) {
+  .stat-grid { grid-template-columns: 1fr; }
 }

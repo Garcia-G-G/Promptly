@@ -4,6 +4,7 @@
   <title>Promptly</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
@@ -11,11 +12,12 @@
   <%= javascript_importmap_tags %>
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
   <% if user_signed_in? && current_workspace %>
     <canvas data-controller="canvas-grid" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
     <div class="app-layout">
       <%= render "shared/sidebar" %>
-      <main class="main-content">
+      <main class="main-content" id="main-content">
         <%= render "shared/top_bar" %>
         <div class="page-content">
           <% if flash[:notice] %>
