@@ -1,0 +1,9 @@
+doc_summarizer:
+  project: playground
+  slug: "doc-summarizer"
+  description: "Summarizes documents"
+
+empty_prompt:
+  project: playground
+  slug: "empty-prompt"
+  description: "Has no versions"

@@ -1,0 +1,17 @@
+# API keys need special handling because key_digest must match a known raw key.
+# We compute the digest at fixture load time.
+demo_key:
+  workspace: demo
+  name: "Test Key"
+  key_prefix: "pk_test_"
+  key_digest: <%= Digest::SHA256.hexdigest("pk_test_key_for_fixtures_only") %>
+  last_used_at: nil
+  revoked_at: nil
+
+revoked_key:
+  workspace: demo
+  name: "Revoked Key"
+  key_prefix: "pk_revok"
+  key_digest: <%= Digest::SHA256.hexdigest("pk_revoked_key_for_fixtures_only") %>
+  last_used_at: nil
+  revoked_at: <%= Time.current %>
