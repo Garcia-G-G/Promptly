@@ -2,12 +2,7 @@ require "test_helper"
 
 class WorkspaceTest < ActiveSupport::TestCase
   setup do
-    @owner = User.create!(
-      email: "owner@test.com",
-      password: "password123456",
-      name: "Test Owner"
-    )
-    @owner.confirm
+    @owner = users(:owner)
   end
 
   test "valid workspace" do

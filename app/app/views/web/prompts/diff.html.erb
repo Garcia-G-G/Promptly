@@ -1,0 +1,52 @@
+<% content_for :page_title, "Diff: #{@prompt.slug}" %>
+
+<div class="page-header">
+  <%= link_to "&larr; #{@prompt.slug}".html_safe, workspace_web_prompt_path(@workspace.slug, @prompt.slug), style: "font-size: 13px; color: var(--t3); text-decoration: none;" %>
+  <h1>Version Diff</h1>
+  <p>
+    <span class="badge badge--red">v<%= @v_old.version_number %></span>
+    &rarr;
+    <span class="badge badge--green">v<%= @v_new.version_number %></span>
+  </p>
+</div>
+
+<% diff_lines = compute_diff(@v_old.content, @v_new.content) %>
+
+<div class="diff-view">
+  <div class="diff-side">
+    <div class="diff-header">v<%= @v_old.version_number %> (<%= @v_old.environment %>)</div>
+    <% diff_lines.each do |line| %>
+      <% if line[:type] == :equal || line[:type] == :del %>
+        <div class="diff-line <%= 'diff-line--del' if line[:type] == :del %>">
+          <span class="diff-line__num"><%= line[:old_num] %></span>
+          <span class="diff-line__indicator"><%= line[:type] == :del ? '-' : ' ' %></span>
+          <span class="diff-line__text"><%= line[:text] %></span>
+        </div>
+      <% else %>
+        <div class="diff-line">
+          <span class="diff-line__num"></span>
+          <span class="diff-line__indicator"></span>
+          <span class="diff-line__text"></span>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="diff-side">
+    <div class="diff-header">v<%= @v_new.version_number %> (<%= @v_new.environment %>)</div>
+    <% diff_lines.each do |line| %>
+      <% if line[:type] == :equal || line[:type] == :add %>
+        <div class="diff-line <%= 'diff-line--add' if line[:type] == :add %>">
+          <span class="diff-line__num"><%= line[:new_num] %></span>
+          <span class="diff-line__indicator"><%= line[:type] == :add ? '+' : ' ' %></span>
+          <span class="diff-line__text"><%= line[:text] %></span>
+        </div>
+      <% else %>
+        <div class="diff-line">
+          <span class="diff-line__num"></span>
+          <span class="diff-line__indicator"></span>
+          <span class="diff-line__text"></span>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

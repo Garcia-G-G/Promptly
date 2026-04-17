@@ -1,0 +1,5 @@
+demo:
+  name: "Demo Workspace"
+  slug: "demo"
+  plan: "starter"
+  owner: owner
