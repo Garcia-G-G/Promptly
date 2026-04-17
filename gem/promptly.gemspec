@@ -15,6 +15,13 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = ">= 3.2.0"
 
+  spec.metadata = {
+    "homepage_uri" => "https://promptly.dev",
+    "source_code_uri" => "https://github.com/promptly-dev/promptly-ruby",
+    "changelog_uri" => "https://github.com/promptly-dev/promptly-ruby/blob/main/CHANGELOG.md",
+    "rubygems_mfa_required" => "true"
+  }
+
   spec.files         = Dir["lib/**/*.rb", "LICENSE.txt", "README.md"]
   spec.require_paths = ["lib"]
 
