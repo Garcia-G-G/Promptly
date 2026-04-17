@@ -1,0 +1,11 @@
+spanish_bullets:
+  dataset: summarizer_cases
+  input_vars: <%= { "language" => "Spanish", "length" => "3 bullets", "document" => "Test doc" }.to_json %>
+  expected_output: "A Spanish summary"
+  tags: <%= ["core"].to_json %>
+
+english_paragraph:
+  dataset: summarizer_cases
+  input_vars: <%= { "language" => "English", "length" => "1 paragraph", "document" => "Test doc" }.to_json %>
+  expected_output:
+  tags: <%= ["edge-case"].to_json %>

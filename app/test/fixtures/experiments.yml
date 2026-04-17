@@ -1,0 +1,8 @@
+tone_tweak:
+  prompt: doc_summarizer
+  name: "tone-tweak"
+  status: "draft"
+  variant_a_version: doc_summarizer_production
+  variant_b_version: doc_summarizer_dev
+  traffic_split: 50
+  environment: "production"
