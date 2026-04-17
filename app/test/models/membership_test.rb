@@ -2,13 +2,8 @@ require "test_helper"
 
 class MembershipTest < ActiveSupport::TestCase
   setup do
-    @owner = User.create!(
-      email: "owner@test.com",
-      password: "password123456",
-      name: "Test Owner"
-    )
-    @owner.confirm
-    @workspace = Workspace.create!(name: "Test", slug: "test", owner: @owner)
+    @owner = users(:owner)
+    @workspace = Workspace.create!(name: "Test", slug: "test-membership", owner: @owner)
   end
 
   test "valid membership" do
