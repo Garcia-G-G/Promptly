@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Promptly — Prompt management for production teams</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Version, test, and deploy your LLM prompts from a single source of truth. Know what's in production and why.">
+  <meta name="theme-color" content="#fafaf9">
+
+  <meta property="og:title" content="Promptly — Prompt management for production teams">
+  <meta property="og:description" content="Version, test, and deploy your LLM prompts from a single source of truth.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= stylesheet_link_tag "landing", "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Promptly","applicationCategory":"DeveloperApplication","description":"Prompt version control and A/B testing for LLM applications","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+  </script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
+  <canvas data-controller="canvas-grid" aria-hidden="true" style="position:fixed;inset:0;z-index:0;pointer-events:none"></canvas>
+  <%= yield %>
+</body>
+</html>

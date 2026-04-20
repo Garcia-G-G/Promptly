@@ -1,17 +1,47 @@
-<h1><%= @workspace.name %></h1>
+<% content_for :page_title, "Overview" %>
 
-<h2>Projects</h2>
+<div class="page-header">
+  <h1>Overview</h1>
+  <p>Last 24 hours</p>
+</div>
 
-<% if @projects.any? %>
-  <ul>
-    <% @projects.each do |project| %>
-      <li>
-        <%= link_to project.name, workspace_project_path(@workspace.slug, project.slug) %>
-      </li>
+<div class="stat-grid" data-controller="reveal" data-reveal-delay-value="0">
+  <div class="stat-card" data-controller="tilt" data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
+    <div class="stat-card__label">SDK Calls</div>
+    <div class="stat-card__value"><%= @recent_logs_count || 0 %></div>
+  </div>
+  <div class="stat-card" data-controller="tilt" data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
+    <div class="stat-card__label">Active Experiments</div>
+    <div class="stat-card__value"><%= @experiments&.count || 0 %></div>
+  </div>
+  <div class="stat-card" data-controller="tilt" data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
+    <div class="stat-card__label">Avg Score</div>
+    <div class="stat-card__value">--</div>
+  </div>
+  <div class="stat-card" data-controller="tilt" data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
+    <div class="stat-card__label">Projects</div>
+    <div class="stat-card__value"><%= @projects.count %></div>
+  </div>
+</div>
+
+<% if @prompts.any? %>
+  <div class="page-header" style="margin-top: 32px;">
+    <h2 style="font-size: 16px; font-weight: 600;">Recent Prompts</h2>
+  </div>
+
+  <div class="prompt-grid">
+    <% @prompts.each do |prompt| %>
+      <% prod_version = prompt.prompt_versions.find { |v| v.environment == "production" } %>
+      <%= link_to workspace_web_prompt_path(@workspace.slug, prompt.slug), class: "prompt-card card", style: "text-decoration: none; color: inherit;", data: { controller: "tilt", action: "mousemove->tilt#mousemove mouseleave->tilt#mouseleave" } do %>
+        <div class="prompt-card__slug"><%= prompt.slug %></div>
+        <div class="prompt-card__desc"><%= prompt.description %></div>
+        <div class="prompt-card__meta">
+          <% if prod_version %>
+            <span class="badge badge--green">production v<%= prod_version.version_number %></span>
+          <% end %>
+          <span style="font-size: 12px; color: var(--t3);"><%= prompt.project.name %></span>
+        </div>
+      <% end %>
     <% end %>
-  </ul>
-<% else %>
-  <p>No projects yet.</p>
+  </div>
 <% end %>
-
-<%= link_to "New Project", new_workspace_project_path(@workspace.slug) %>

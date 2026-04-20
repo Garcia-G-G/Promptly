@@ -1,0 +1,10 @@
+<div class="top-bar">
+  <div class="top-bar__breadcrumb">
+    <span class="top-bar__crumb--muted"><%= current_workspace.name %></span>
+    <span class="top-bar__separator">/</span>
+    <span class="top-bar__crumb--current"><%= content_for?(:page_title) ? yield(:page_title) : "Dashboard" %></span>
+  </div>
+  <div class="top-bar__actions">
+    <div class="cmd-k"><span class="cmd-k__key">&#8984;</span> K</div>
+  </div>
+</div>
