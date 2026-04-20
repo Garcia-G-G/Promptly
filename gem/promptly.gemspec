@@ -19,6 +19,8 @@ Gem::Specification.new do |spec|
     "homepage_uri" => "https://promptly.dev",
     "source_code_uri" => "https://github.com/promptly-dev/promptly-ruby",
     "changelog_uri" => "https://github.com/promptly-dev/promptly-ruby/blob/main/CHANGELOG.md",
+    "documentation_uri" => "https://docs.promptly.dev/ruby-sdk",
+    "bug_tracker_uri" => "https://github.com/promptly-dev/promptly-ruby/issues",
     "rubygems_mfa_required" => "true"
   }
 
