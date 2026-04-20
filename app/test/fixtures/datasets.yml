@@ -1,0 +1,4 @@
+summarizer_cases:
+  project: playground
+  name: "summarizer-test-cases"
+  description: "Test cases for doc-summarizer"

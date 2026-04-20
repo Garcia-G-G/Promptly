@@ -1,0 +1,19 @@
+doc_summarizer_dev:
+  prompt: doc_summarizer
+  version_number: 1
+  content: "Summarize this document in {language}. Keep it to {length}."
+  variables: <%= [{ "name" => "language", "default" => "English" }, { "name" => "length", "default" => "3 bullets" }].to_json %>
+  model_hint: "claude-sonnet-4-6"
+  environment: "dev"
+  content_hash: <%= Digest::SHA256.hexdigest("Summarize this document in {language}. Keep it to {length}.") %>
+  created_via: "api"
+
+doc_summarizer_production:
+  prompt: doc_summarizer
+  version_number: 2
+  content: "You are a document summarizer. Summarize in {language}, {length} format."
+  variables: <%= [{ "name" => "language", "default" => "English" }, { "name" => "length", "default" => "3 bullets" }].to_json %>
+  model_hint: "claude-sonnet-4-6"
+  environment: "production"
+  content_hash: <%= Digest::SHA256.hexdigest("You are a document summarizer. Summarize in {language}, {length} format.") %>
+  created_via: "api"

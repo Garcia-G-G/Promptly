@@ -207,6 +207,8 @@ GEM
       railties (>= 7.1)
       stimulus-rails
       turbo-rails
+    mock_redis (0.53.0)
+      redis (~> 5)
     msgpack (1.8.0)
     net-http (0.9.1)
       uri (>= 0.11.1)
@@ -506,6 +508,7 @@ DEPENDENCIES
   brakeman
   bundler-audit
   capybara
+  connection_pool
   debug
   devise
   dotenv-rails
@@ -514,6 +517,7 @@ DEPENDENCIES
   importmap-rails
   kamal
   mission_control-jobs
+  mock_redis
   octokit
   opentelemetry-instrumentation-rails
   opentelemetry-sdk
