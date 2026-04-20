@@ -1,153 +1,466 @@
-<%# Navigation — minimal, no borders, transparent %>
-<nav class="nav">
-  <a href="/" class="nav__logo">
-    <svg class="nav__mark" width="24" height="24" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#f97316"/><path d="M8 7h4.5a3.5 3.5 0 0 1 0 7H10v3.5H8V7z" fill="white"/></svg>
+<%# ─── Nav ─── %>
+<nav class="nav" aria-label="Primary">
+  <%= link_to root_path, class: "nav-logo" do %>
+    <span class="logo-mark" aria-hidden="true">P</span>
     <span>Promptly</span>
-  </a>
-  <div class="nav__links">
-    <a href="#features">Features</a>
-    <a href="#pricing">Pricing</a>
-    <%= link_to "Log in", new_user_session_path %>
+  <% end %>
+
+  <div class="nav-links">
+    <a href="#features" class="nav-link">Features</a>
+    <a href="#pricing" class="nav-link">Pricing</a>
+    <a href="#docs" class="nav-link">Docs</a>
+    <a href="#changelog" class="nav-link">Changelog</a>
   </div>
-  <%= link_to "Get started", new_user_registration_path, class: "nav__cta" %>
+
+  <div class="nav-actions">
+    <%= link_to "Log in", new_user_session_path, class: "nav-login" %>
+    <%= link_to "Sign up", new_user_registration_path, class: "nav-cta" %>
+  </div>
 </nav>
 
-<%# Hero — product-first, code IS the hero %>
-<section class="hero">
-  <p class="hero__eyebrow reveal">
-    <span class="hero__dot"></span>
-    Now in public beta
-  </p>
-
-  <h1 class="hero__h1 reveal reveal-d1">
-    Prompts are code.<br>
-    <em>Treat them that way.</em>
-  </h1>
-
-  <p class="hero__sub reveal reveal-d2">
-    Version, A/B test, score, and deploy your LLM prompts<br class="hide-mobile">
-    from one place your whole team can trust.
-  </p>
-
-  <div class="hero__buttons reveal reveal-d3">
-    <%= link_to "Start building — free", new_user_registration_path, class: "btn-accent" %>
-    <a href="#features" class="btn-ghost">See how it works &darr;</a>
-  </div>
-
-  <%# The code window — this IS the product pitch %>
-  <div class="terminal reveal reveal-d4" data-controller="tilt" data-tilt-depth-value="2" data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
-    <div class="terminal__chrome">
-      <div class="terminal__dots"><i></i><i></i><i></i></div>
-      <span class="terminal__tab">app.rb</span>
-    </div>
-    <pre class="terminal__code"><span class="ln"> 1</span>  <span class="kw">require</span> <span class="s">"promptly"</span>
-<span class="ln"> 2</span>
-<span class="ln"> 3</span>  <span class="c"># Resolve the active prompt — environment-aware,</span>
-<span class="ln"> 4</span>  <span class="c"># A/B routed, scored automatically.</span>
-<span class="ln"> 5</span>  prompt = <span class="v">Promptly</span>.get(<span class="s">"onboarding-email"</span>)
-<span class="ln"> 6</span>
-<span class="ln"> 7</span>  result = anthropic.messages.create(
-<span class="ln"> 8</span>    model: prompt.<span class="v">model_hint</span>,
-<span class="ln"> 9</span>    messages: [{ role: <span class="s">"user"</span>, content: prompt.to_s }]
-<span class="ln">10</span>  )
-<span class="ln">11</span>
-<span class="ln">12</span>  <span class="v">Promptly</span>.log(prompt_slug: <span class="s">"onboarding-email"</span>, output: result)</pre>
-  </div>
-</section>
-
-<%# Features — three big cards, not a long list %>
-<section class="features" id="features">
-  <div class="features__intro reveal">
-    <span class="tag">How it works</span>
-    <h2>Push. Test. Ship.</h2>
-  </div>
-
-  <div class="features__grid">
-    <div class="fcard reveal reveal-d1">
-      <div class="fcard__number">01</div>
-      <h3>Version everything</h3>
-      <p>Every prompt edit is an immutable version with a SHA-256 hash. Diff any two, roll back in one click. No more "which Slack message had the latest prompt?"</p>
+<main id="main-content">
+  <%# ─── Hero ─── %>
+  <section class="hero">
+    <div data-controller="reveal">
+      <span class="hero-badge">Now in public beta</span>
     </div>
 
-    <div class="fcard reveal reveal-d2">
-      <div class="fcard__number">02</div>
-      <h3>A/B test in production</h3>
-      <p>Split traffic between variants with sticky sessions. Canary from 1% to 100%. Bayesian significance testing declares winners — no spreadsheets required.</p>
+    <div data-controller="reveal" data-reveal-delay-value="80">
+      <h1 class="hero-title">Prompt management<br>for production teams</h1>
     </div>
 
-    <div class="fcard reveal reveal-d3">
-      <div class="fcard__number">03</div>
-      <h3>Score every output</h3>
-      <p>Attach LLM-as-judge scorers or regex matchers. Run eval datasets before promoting. Security scans catch injection patterns before they reach production.</p>
+    <div data-controller="reveal" data-reveal-delay-value="160">
+      <p class="hero-sub">
+        Version, test, and deploy your LLM prompts from a single source of truth. Know what's in production and why.
+      </p>
     </div>
-  </div>
 
-  <div class="features__detail reveal reveal-d4">
-    <div class="features__detail-list">
-      <div class="fdetail">
-        <span class="fdetail__label">Environments</span>
-        <span class="fdetail__value">dev &rarr; staging &rarr; production</span>
+    <div data-controller="reveal" data-reveal-delay-value="240">
+      <div class="hero-ctas">
+        <%= link_to "Get started", new_user_registration_path, class: "btn btn--primary" %>
+        <span class="btn btn--secondary btn--mono">
+          <span class="btn-prompt">$</span> gem install promptly
+        </span>
       </div>
-      <div class="fdetail">
-        <span class="fdetail__label">Resolve p95</span>
-        <span class="fdetail__value">&lt; 8ms</span>
-      </div>
-      <div class="fdetail">
-        <span class="fdetail__label">SDK</span>
-        <span class="fdetail__value">Ruby (Python, JS coming)</span>
-      </div>
-      <div class="fdetail">
-        <span class="fdetail__label">Observability</span>
-        <span class="fdetail__value">OpenTelemetry GenAI native</span>
+      <p class="hero-caption">Free up to 1,000 calls/mo. No credit card.</p>
+    </div>
+  </section>
+
+  <%# ─── Product preview ─── %>
+  <section class="product-preview">
+    <div data-controller="reveal" data-reveal-delay-value="300">
+      <div class="browser"
+           data-controller="tilt"
+           data-tilt-depth-value="2"
+           data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
+        <div class="browser-chrome">
+          <div class="browser-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="browser-address">
+            <span>app.promptly.dev/playground/overview</span>
+          </div>
+        </div>
+        <div class="mini-app">
+          <aside class="mini-sidebar">
+            <div class="mini-sidebar-logo">
+              <span class="logo-mark" aria-hidden="true">P</span>
+              <span>Promptly</span>
+            </div>
+            <div class="mini-nav-item mini-nav-item--active">Overview</div>
+            <div class="mini-nav-item">Prompts</div>
+            <div class="mini-nav-item">Experiments</div>
+            <div class="mini-nav-item">Logs</div>
+          </aside>
+          <div class="mini-content">
+            <div class="mini-content-title">Overview</div>
+            <div class="mini-stats">
+              <div class="mini-stat">
+                <div class="mini-stat-label">SDK calls</div>
+                <div class="mini-stat-value">2,847</div>
+                <div class="mini-stat-change">+12.3%</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-label">Experiments</div>
+                <div class="mini-stat-value">1</div>
+                <div class="mini-stat-change mini-stat-change--muted">running</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-label">Avg. score</div>
+                <div class="mini-stat-value">0.84</div>
+                <div class="mini-stat-change">+0.03</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-label">p95 latency</div>
+                <div class="mini-stat-value">18ms</div>
+                <div class="mini-stat-change mini-stat-change--muted">&lt; budget</div>
+              </div>
+            </div>
+            <div class="mini-experiment">
+              <div class="mini-experiment-header">
+                <span class="live-dot" aria-hidden="true"></span>
+                <span class="mini-experiment-name">tone-tweak</span>
+                <span class="mini-experiment-on">on</span>
+                <span class="mini-experiment-prompt">doc-summarizer</span>
+              </div>
+              <div class="mini-experiment-body">
+                <div class="mini-variant">
+                  <div class="mini-variant-label">Variant A</div>
+                  <div class="mini-variant-score">0.82</div>
+                  <div class="mini-variant-calls">1,247 calls</div>
+                </div>
+                <div class="mini-variant">
+                  <div class="mini-variant-label">
+                    Variant B
+                    <span class="mini-variant-tag">leading</span>
+                  </div>
+                  <div class="mini-variant-score">0.86</div>
+                  <div class="mini-variant-calls">1,253 calls</div>
+                </div>
+                <div class="mini-variant">
+                  <div class="mini-variant-label">Significance</div>
+                  <div class="mini-variant-score">82%</div>
+                  <div class="mini-sig-bar"><div class="mini-sig-fill" style="width:82%"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<%# Pricing — dead simple %>
-<section class="pricing" id="pricing">
-  <div class="pricing__intro reveal">
-    <span class="tag">Pricing</span>
-    <h2>Start free. Scale later.</h2>
-  </div>
-
-  <div class="pricing__cards">
-    <div class="pcard reveal reveal-d1">
-      <div class="pcard__name">Free</div>
-      <div class="pcard__price">$0</div>
-      <ul class="pcard__list">
-        <li>3 projects</li>
-        <li>10k resolves / month</li>
-        <li>2 team members</li>
-        <li>Community support</li>
-      </ul>
-      <%= link_to "Get started", new_user_registration_path, class: "btn-ghost btn-ghost--full" %>
+  <%# ─── Social proof ─── %>
+  <section class="social-proof">
+    <div data-controller="reveal">
+      <p class="social-proof-label">Trusted by teams shipping AI products</p>
+      <div class="social-proof-logos">
+        <% %w[Ramp Vercel Linear Notion Resend Cal.com].each do |name| %>
+          <span><%= name %></span>
+        <% end %>
+      </div>
     </div>
+  </section>
 
-    <div class="pcard pcard--pro reveal reveal-d2">
-      <div class="pcard__badge">Most popular</div>
-      <div class="pcard__name">Pro</div>
-      <div class="pcard__price">$49<span>/mo</span></div>
-      <ul class="pcard__list">
-        <li>Unlimited projects</li>
-        <li>Unlimited resolves</li>
-        <li>Unlimited members</li>
-        <li>A/B testing + scoring</li>
-        <li>Security scans</li>
-        <li>Priority support</li>
-      </ul>
-      <%= link_to "Start free trial", new_user_registration_path, class: "btn-accent btn-accent--full" %>
+  <%# ─── Problem statement ─── %>
+  <section class="problem">
+    <div data-controller="reveal">
+      <p>
+        Your prompts are scattered across codebases, Notion pages, and Slack threads. When something breaks in production, nobody knows what changed or when.
+        <span class="problem-emphasis">Promptly gives every prompt a history, every change a reason, and every team member a shared view.</span>
+      </p>
     </div>
-  </div>
-</section>
+  </section>
 
-<%# Footer — barely there %>
-<footer class="foot">
-  <div class="foot__inner">
-    <span class="foot__brand">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#f97316"/><path d="M8 7h4.5a3.5 3.5 0 0 1 0 7H10v3.5H8V7z" fill="white"/></svg>
-      Promptly
-    </span>
-    <span class="foot__copy">&copy; <%= Date.current.year %></span>
+  <%# ─── Feature 1: Version Control ─── %>
+  <section class="feature-section" id="features">
+    <div class="feature-section-inner">
+      <div class="feature-text" data-controller="reveal">
+        <span class="feature-label">Version control</span>
+        <h2 class="feature-h2">Every edit is<br>a new version</h2>
+        <p class="feature-desc">
+          Prompts are immutable. Every change creates a new version with a full diff, author, and timestamp. Roll back to any previous version in one click.
+        </p>
+        <ul class="feature-bullets">
+          <li class="feature-bullet">Side-by-side diffs between any two versions</li>
+          <li class="feature-bullet">Instant rollback to any previous version</li>
+          <li class="feature-bullet">Full audit trail — who changed what and when</li>
+        </ul>
+      </div>
+      <div class="feature-visual feature-visual--subtle"
+           data-controller="tilt reveal"
+           data-tilt-depth-value="3"
+           data-reveal-delay-value="100"
+           data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
+        <div class="diff-viewer">
+          <div class="diff-col">
+            <div class="diff-label">v2</div>
+            <div class="diff-line"><span class="diff-line-sign"> </span>You are a document summarizer.</div>
+            <div class="diff-line"><span class="diff-line-sign"> </span>&nbsp;</div>
+            <div class="diff-line diff-line--del"><span class="diff-line-sign">−</span>Summarize this document</div>
+            <div class="diff-line diff-line--del"><span class="diff-line-sign">−</span>in {language}.</div>
+          </div>
+          <div class="diff-col">
+            <div class="diff-label">v3</div>
+            <div class="diff-line"><span class="diff-line-sign"> </span>You are a document summarizer.</div>
+            <div class="diff-line"><span class="diff-line-sign"> </span>&nbsp;</div>
+            <div class="diff-line diff-line--add"><span class="diff-line-sign">+</span>Summarize the following document</div>
+            <div class="diff-line diff-line--add"><span class="diff-line-sign">+</span>in {language}. Format: {length}.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%# ─── Feature 2: A/B Testing ─── %>
+  <section class="feature-section feature-section--flipped">
+    <div class="feature-section-inner">
+      <div class="feature-visual experiment-card"
+           data-controller="tilt reveal"
+           data-tilt-depth-value="3"
+           data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
+        <div class="experiment-header">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span class="experiment-title">tone-tweak</span>
+          <span class="experiment-tag">canary 10%</span>
+        </div>
+        <div class="experiment-body">
+          <div class="variant">
+            <div class="variant-head">
+              <div class="variant-id">A</div>
+              <span class="variant-name">Original</span>
+            </div>
+            <div class="variant-score">0.82</div>
+            <div class="variant-calls">1,247 calls</div>
+          </div>
+          <div class="variant variant--leading">
+            <div class="variant-head">
+              <div class="variant-id">B</div>
+              <span class="variant-name">Concise rewrite</span>
+            </div>
+            <div class="variant-score">0.86</div>
+            <div class="variant-calls">1,253 calls</div>
+            <div class="variant-badge">+4.9% improvement</div>
+          </div>
+        </div>
+        <div class="significance">
+          <div class="significance-label">
+            Significance: <strong>82%</strong> of 95%
+          </div>
+          <div class="significance-bar">
+            <div class="significance-fill" style="width:82%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="feature-text" data-controller="reveal" data-reveal-delay-value="100">
+        <span class="feature-label">A/B testing</span>
+        <h2 class="feature-h2">Test prompts<br>before you ship</h2>
+        <p class="feature-desc">
+          Split traffic between prompt variants and let Bayesian statistics find the winner. Canary deploy at 1%, then ramp to 100% — or auto-rollback if quality drops.
+        </p>
+        <ul class="feature-bullets">
+          <li class="feature-bullet">Bayesian significance — no fixed sample sizes</li>
+          <li class="feature-bullet">Canary stages: 1% → 10% → 50% → 100%</li>
+          <li class="feature-bullet">Auto-rollback when scores drop below threshold</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <%# ─── Feature 3: SDK & API ─── %>
+  <section class="feature-section">
+    <div class="feature-section-inner">
+      <div class="feature-text" data-controller="reveal">
+        <span class="feature-label">SDK &amp; API</span>
+        <h2 class="feature-h2">Two lines to<br>resolve a prompt</h2>
+        <p class="feature-desc">
+          The Ruby gem resolves prompts in under 25ms with built-in retries, OpenTelemetry tracing, and automatic variable interpolation. No SDK lock-in — it's just an HTTP call.
+        </p>
+        <div class="feature-stats">
+          <div>
+            <div class="feature-stat-value">&lt; 25ms</div>
+            <div class="feature-stat-label">p95 resolve</div>
+          </div>
+          <div>
+            <div class="feature-stat-value">0</div>
+            <div class="feature-stat-label">dependencies</div>
+          </div>
+          <div>
+            <div class="feature-stat-value">OTel</div>
+            <div class="feature-stat-label">built-in</div>
+          </div>
+        </div>
+      </div>
+      <div class="feature-visual code-editor"
+           data-controller="tilt reveal"
+           data-tilt-depth-value="3"
+           data-reveal-delay-value="100"
+           data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
+        <div class="code-editor-chrome">
+          <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+          <span class="file">app.rb</span>
+        </div>
+        <pre class="code-body"><code><span class="code-line"><span class="code-ln">1</span><span class="code-kw">require</span> <span class="code-str">"promptly"</span></span>
+<span class="code-line"><span class="code-ln">2</span></span>
+<span class="code-line"><span class="code-ln">3</span>Promptly.configure <span class="code-com">do</span> |config|</span>
+<span class="code-line"><span class="code-ln">4</span>  config.api_key = ENV[<span class="code-str">"PROMPTLY_KEY"</span>]</span>
+<span class="code-line"><span class="code-ln">5</span><span class="code-com">end</span></span>
+<span class="code-line"><span class="code-ln">6</span></span>
+<span class="code-line"><span class="code-ln">7</span>prompt = Promptly.get(<span class="code-str">"doc-summarizer"</span>)</span>
+<span class="code-line"><span class="code-ln">8</span>result = prompt.resolve(<span class="code-var">language:</span> <span class="code-str">"es"</span>)</span></code></pre>
+      </div>
+    </div>
+  </section>
+
+  <%# ─── Feature grid (6 items) ─── %>
+  <section class="feature-grid-wrap">
+    <div data-controller="reveal">
+      <div class="feature-grid-intro">
+        <span class="feature-label">And more</span>
+        <h2>Everything else you need</h2>
+      </div>
+    </div>
+    <div class="feature-grid">
+      <% [
+        ["Automated Scoring", "Score every LLM response with Claude. Detect quality regressions before your users do."],
+        ["Environments", "Promote through dev → staging → production. Each env resolves its own version."],
+        ["Team Workspace", "Role-based access, audit logs, API keys, and shared dashboards for your whole team."],
+        ["GitHub PR Bot", "Auto-comments on PRs that touch prompts with diffs, experiments, and score trends."],
+        ["OpenTelemetry", "GenAI semantic convention spans. Correlate prompt perf with your observability stack."],
+        ["Usage Billing", "Stripe Billing Meters track SDK calls. Plan limits, overages, self-serve portal."]
+      ].each_with_index do |(title, desc), i| %>
+        <div class="feature-grid-item" data-controller="reveal" data-reveal-delay-value="<%= i * 40 %>">
+          <div class="feature-grid-title"><%= title %></div>
+          <div class="feature-grid-desc"><%= desc %></div>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <%# ─── How it works ─── %>
+  <section class="how-section">
+    <div data-controller="reveal">
+      <div class="how-intro">
+        <h2>Up and running in five minutes</h2>
+        <p>Three steps from signup to production.</p>
+      </div>
+    </div>
+    <div class="how-steps">
+      <% [
+        ["1", "Create a prompt", "Write your prompt template in the dashboard with variables like {language} and {document}. Save it — that's v1."],
+        ["2", "Install the gem", "Add the Ruby gem to your app. Configure your API key. Call Promptly.get('my-prompt') to resolve it at runtime."],
+        ["3", "Ship and iterate", "Edit prompts without redeploying code. Run A/B tests. Score responses. Promote what works to production."]
+      ].each_with_index do |(num, title, desc), i| %>
+        <div data-controller="reveal" data-reveal-delay-value="<%= i * 100 %>">
+          <div class="how-step-num"><%= num %></div>
+          <div class="how-step-title"><%= title %></div>
+          <div class="how-step-desc"><%= desc %></div>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <%# ─── Numbers ─── %>
+  <section class="numbers">
+    <div data-controller="reveal">
+      <div class="numbers-grid">
+        <% [["< 25ms", "p95 resolve latency"], ["50k+", "SDK calls processed daily"], ["99.9%", "API uptime SLA"]].each do |(value, label)| %>
+          <div>
+            <div class="number-value"><%= value %></div>
+            <div class="number-label"><%= label %></div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <%# ─── Pricing ─── %>
+  <section class="pricing" id="pricing">
+    <div data-controller="reveal">
+      <div class="pricing-intro">
+        <h2>Simple, transparent pricing</h2>
+        <p>Start free. Upgrade when your usage grows.</p>
+      </div>
+    </div>
+    <div class="pricing-grid">
+      <% pricing_tiers = [
+        {
+          name: "Free",
+          price: "$0",
+          period: "/mo",
+          desc: "For side projects and prototyping",
+          features: ["5 prompts", "1,000 SDK calls/mo", "1 workspace member", "Community support"],
+          cta: "Get started",
+          popular: false
+        },
+        {
+          name: "Pro",
+          price: "$49",
+          period: "/mo",
+          desc: "For teams shipping AI to production",
+          features: ["Unlimited prompts", "100k SDK calls/mo", "10 workspace members", "A/B testing & scoring", "GitHub PR bot", "Priority support"],
+          cta: "Start free trial",
+          popular: true
+        },
+        {
+          name: "Enterprise",
+          price: "Custom",
+          period: nil,
+          desc: "For orgs with advanced needs",
+          features: ["Everything in Pro", "Unlimited SDK calls", "SSO / SAML", "Dedicated support", "SLA guarantee", "Custom integrations"],
+          cta: "Talk to us",
+          popular: false
+        }
+      ] %>
+      <% pricing_tiers.each_with_index do |plan, i| %>
+        <div class="pricing-card <%= "pricing-card--popular" if plan[:popular] %>"
+             data-controller="tilt reveal"
+             data-reveal-delay-value="<%= i * 80 %>"
+             data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
+          <% if plan[:popular] %>
+            <div class="pricing-badge">Most popular</div>
+          <% end %>
+          <div class="pricing-name"><%= plan[:name] %></div>
+          <div class="pricing-price-row">
+            <span class="pricing-price"><%= plan[:price] %></span>
+            <% if plan[:period] %>
+              <span class="pricing-period"><%= plan[:period] %></span>
+            <% end %>
+          </div>
+          <div class="pricing-desc"><%= plan[:desc] %></div>
+          <ul class="pricing-features">
+            <% plan[:features].each do |f| %>
+              <li class="pricing-feature"><%= f %></li>
+            <% end %>
+          </ul>
+          <% if plan[:name] == "Enterprise" %>
+            <a href="mailto:hello@promptly.dev" class="pricing-cta pricing-cta--secondary"><%= plan[:cta] %></a>
+          <% else %>
+            <%= link_to plan[:cta], new_user_registration_path,
+                  class: "pricing-cta #{plan[:popular] ? 'pricing-cta--primary' : 'pricing-cta--secondary'}" %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <%# ─── Final CTA ─── %>
+  <section class="final-cta">
+    <div data-controller="reveal">
+      <h2>Stop guessing.<br>Start measuring.</h2>
+      <p>Your prompts deserve the same rigor as your code. Set up Promptly in five minutes and ship with confidence.</p>
+      <div class="final-cta-buttons">
+        <%= link_to "Get started", new_user_registration_path, class: "btn btn--primary btn--lg" %>
+        <a href="#docs" class="btn btn--secondary btn--lg">Read the docs</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%# ─── Footer ─── %>
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand-row">
+        <span class="logo-mark" aria-hidden="true">P</span>
+        <span>Promptly</span>
+      </div>
+      <div class="footer-copy">
+        Prompt management for production teams.<br>
+        &copy; <%= Date.current.year %> Promptly.
+      </div>
+    </div>
+    <div class="footer-cols">
+      <% [
+        ["Product", %w[Features Pricing Changelog Roadmap]],
+        ["Developers", ["Documentation", "API Reference", "Ruby SDK", "Status"]],
+        ["Company", %w[About Blog GitHub Contact]]
+      ].each do |title, links| %>
+        <div class="footer-col">
+          <div class="footer-col-title"><%= title %></div>
+          <% links.each do |l| %>
+            <a href="#" class="footer-col-link"><%= l %></a>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
   </div>
 </footer>
