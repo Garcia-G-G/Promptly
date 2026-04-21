@@ -1,0 +1,39 @@
+<% content_for :page_title, "New version" %>
+
+<div class="page-header">
+  <%= link_to "&larr; #{@prompt.slug}".html_safe, workspace_web_prompt_path(@workspace.slug, @prompt.slug),
+        style: "font-size: 13px; color: var(--t3); text-decoration: none;" %>
+  <h1>New version of <code style="font-family: var(--font-mono);"><%= @prompt.slug %></code></h1>
+  <p>Current: <strong>v<%= @current_version&.version_number || 0 %></strong> in <%= @current_version&.environment || "—" %></p>
+</div>
+
+<div class="card" style="max-width: 680px;">
+  <%= form_with url: workspace_web_prompt_versions_path(@workspace.slug, @prompt.slug),
+        method: :post,
+        class: "form",
+        local: true do %>
+    <div class="form-group">
+      <label class="form-label">Content</label>
+      <textarea name="prompt_version[content]"
+                rows="14"
+                class="form-input"
+                style="font-family: var(--font-mono); font-size: 13px; line-height: 1.8; resize: vertical;"
+                required><%= @current_version&.content %></textarea>
+      <p class="form-hint">Pushes as a new version in <code>dev</code>. Promote it from the prompt detail page once it's tested.</p>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Model hint</label>
+      <select name="prompt_version[model_hint]" class="form-input">
+        <% [ [ "claude-sonnet-4-6", "Claude Sonnet 4.6" ], [ "claude-haiku-4-5", "Claude Haiku 4.5" ], [ "", "No preference" ] ].each do |value, label| %>
+          <option value="<%= value %>" <%= "selected" if @current_version&.model_hint.to_s == value %>><%= label %></option>
+        <% end %>
+      </select>
+    </div>
+
+    <div style="display: flex; gap: 8px; margin-top: 24px;">
+      <button type="submit" class="btn btn--primary">Push version</button>
+      <%= link_to "Cancel", workspace_web_prompt_path(@workspace.slug, @prompt.slug), class: "btn btn--secondary" %>
+    </div>
+  <% end %>
+</div>
