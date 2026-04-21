@@ -15,7 +15,7 @@ module Web
         variables: extract_variables(content),
         model_hint: params.dig(:prompt_version, :model_hint).presence || PromptVersion::DEFAULT_MODEL_HINT,
         created_by: current_user,
-        created_via: :web,
+        created_via: :ui,
         parent_version: @prompt.prompt_versions.order(version_number: :desc).first
       )
 
