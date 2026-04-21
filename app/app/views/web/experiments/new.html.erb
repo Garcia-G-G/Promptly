@@ -1,0 +1,113 @@
+<% content_for :page_title, "New experiment" %>
+
+<div class="page-header">
+  <%= link_to "&larr; Experiments".html_safe, workspace_web_experiments_path(@workspace.slug),
+        style: "font-size: 13px; color: var(--t3); text-decoration: none;" %>
+  <h1>New experiment</h1>
+  <p>Create an A/B test to compare two versions of a prompt.</p>
+</div>
+
+<div class="card" style="max-width: 680px;" data-controller="experiment-form">
+  <%= form_with model: @experiment,
+        url: workspace_web_experiments_path(@workspace.slug),
+        class: "form",
+        local: true do |f| %>
+
+    <div class="form-group">
+      <%= f.label :name, "Experiment name", class: "form-label" %>
+      <%= f.text_field :name, placeholder: "v3-tone-improvement", class: "form-input" %>
+      <p class="form-hint">A short, descriptive name unique within the prompt.</p>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :prompt_id, "Prompt", class: "form-label" %>
+      <select name="experiment[prompt_id]" class="form-input"
+              data-experiment-form-target="promptSelect"
+              data-action="change->experiment-form#promptChanged">
+        <option value="">Select a prompt…</option>
+        <% @prompts.each do |prompt| %>
+          <%
+            versions_json = prompt.prompt_versions.order(version_number: :desc).map do |v|
+              { id: v.id, label: "v#{v.version_number} (#{v.environment})" }
+            end.to_json
+          %>
+          <option value="<%= prompt.id %>" data-versions="<%= versions_json %>">
+            <%= prompt.slug %> — <%= prompt.project.name %>
+          </option>
+        <% end %>
+      </select>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+      <div class="form-group">
+        <%= f.label :variant_a_version_id, "Variant A (version)", class: "form-label" %>
+        <select name="experiment[variant_a_version_id]" class="form-input"
+                data-experiment-form-target="variantASelect">
+          <option value="">Select prompt first…</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :variant_b_version_id, "Variant B (version)", class: "form-label" %>
+        <select name="experiment[variant_b_version_id]" class="form-input"
+                data-experiment-form-target="variantBSelect">
+          <option value="">Select prompt first…</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group" data-controller="traffic-split">
+      <label class="form-label">Traffic split</label>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <input type="range"
+               name="experiment[traffic_split]"
+               min="1" max="99" value="<%= @experiment.traffic_split || 50 %>"
+               class="form-range"
+               data-traffic-split-target="slider"
+               data-action="input->traffic-split#update"
+               style="flex: 1;">
+        <span data-traffic-split-target="display"
+              style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; white-space: nowrap; min-width: 120px; text-align: right;">
+          A: <%= @experiment.traffic_split || 50 %>% / B: <%= 100 - (@experiment.traffic_split || 50) %>%
+        </span>
+      </div>
+      <p class="form-hint">Percentage of traffic routed to variant A. The rest goes to variant B.</p>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Environment</label>
+      <select name="experiment[environment]" class="form-input">
+        <% %w[production staging dev].each do |env| %>
+          <option value="<%= env %>" <%= "selected" if @experiment.environment == env %>><%= env %></option>
+        <% end %>
+      </select>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+      <div class="form-group">
+        <label class="form-label">Canary stage</label>
+        <select name="experiment[canary_stage]" class="form-input">
+          <option value="">None (full traffic immediately)</option>
+          <% [ 1, 10, 50, 100 ].each do |stage| %>
+            <option value="<%= stage %>" <%= "selected" if @experiment.canary_stage == stage %>>Start at <%= stage %>%</option>
+          <% end %>
+        </select>
+        <p class="form-hint">Gradual rollout stage. Advance manually from the detail page.</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Auto-rollback threshold</label>
+        <input type="number" name="experiment[auto_rollback_threshold]"
+               step="0.01" min="0" max="1" placeholder="e.g. 0.3"
+               value="<%= @experiment.auto_rollback_threshold %>"
+               class="form-input">
+        <p class="form-hint">Pause experiment if avg score drops below this.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 8px; margin-top: 24px;">
+      <%= f.submit "Create experiment", class: "btn btn--primary" %>
+      <%= link_to "Cancel", workspace_web_experiments_path(@workspace.slug), class: "btn btn--secondary" %>
+    </div>
+  <% end %>
+</div>
