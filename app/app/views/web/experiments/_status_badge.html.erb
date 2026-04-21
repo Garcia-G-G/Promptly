@@ -1,0 +1,30 @@
+<%
+  case status
+  when "draft"
+    klass = "badge badge--blue"
+    label = "draft"
+    dot = false
+  when "running"
+    klass = "badge badge--green"
+    label = "running"
+    dot = true
+  when "paused"
+    klass = "badge badge--amber"
+    label = "paused"
+    dot = false
+  when "concluded"
+    klass = "badge"
+    label = "concluded"
+    dot = false
+  else
+    klass = "badge"
+    label = status.to_s
+    dot = false
+  end
+%>
+<span class="<%= klass %>" style="<%= 'background: var(--card-hover); color: var(--t3);' if status == 'concluded' %> display: inline-flex; align-items: center; gap: 4px;">
+  <% if dot %>
+    <span style="width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: live-dot 2s infinite;" aria-hidden="true"></span>
+  <% end %>
+  <%= label %>
+</span>

@@ -1,0 +1,281 @@
+<% content_for :page_title, @experiment.name %>
+
+<% if @experiment.running? %>
+  <% # Auto-refresh every 10s while running — simple and no JS. %>
+  <% content_for :head do %>
+    <meta http-equiv="refresh" content="10">
+  <% end %>
+<% end %>
+
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+  <div>
+    <%= link_to "&larr; Experiments".html_safe, workspace_web_experiments_path(@workspace.slug),
+          style: "font-size: 13px; color: var(--t3); text-decoration: none;" %>
+    <h1 style="margin-top: 4px;"><%= @experiment.name %></h1>
+    <p style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+      Prompt:
+      <%= link_to @experiment.prompt.slug,
+            workspace_web_prompt_path(@workspace.slug, @experiment.prompt.slug),
+            style: "color: var(--accent); font-family: var(--font-mono); font-size: 13px;" %>
+      <span style="color: var(--t3);">·</span>
+      <span class="badge badge--<%= @experiment.environment == 'production' ? 'green' : @experiment.environment == 'staging' ? 'amber' : 'blue' %>"><%= @experiment.environment %></span>
+      <span style="color: var(--t3);">·</span>
+      <%= render "status_badge", status: @experiment.status %>
+    </p>
+  </div>
+
+  <div style="display: flex; gap: 6px; align-items: flex-start;">
+    <% if @experiment.draft? %>
+      <%= button_to "Start experiment",
+            start_workspace_web_experiment_path(@workspace.slug, @experiment),
+            method: :post, class: "btn btn--primary" %>
+    <% elsif @experiment.running? || @experiment.paused? %>
+      <% if @experiment.running? %>
+        <%= button_to "Pause",
+              pause_workspace_web_experiment_path(@workspace.slug, @experiment),
+              method: :post, class: "btn btn--secondary btn--sm" %>
+      <% else %>
+        <%= button_to "Resume",
+              resume_workspace_web_experiment_path(@workspace.slug, @experiment),
+              method: :post, class: "btn btn--primary btn--sm" %>
+      <% end %>
+
+      <div class="dropdown" data-controller="dropdown">
+        <button type="button"
+                class="btn btn--secondary btn--sm"
+                data-action="click->dropdown#toggle">Conclude ▾</button>
+        <div class="dropdown__menu" data-dropdown-target="menu" hidden>
+          <p class="dropdown__label">Declare winner</p>
+          <%= button_to "Variant A (v#{@experiment.variant_a_version.version_number}) wins",
+                conclude_workspace_web_experiment_path(@workspace.slug, @experiment),
+                params: { winner_version_id: @experiment.variant_a_version_id },
+                method: :post,
+                class: "dropdown__item" %>
+          <%= button_to "Variant B (v#{@experiment.variant_b_version.version_number}) wins",
+                conclude_workspace_web_experiment_path(@workspace.slug, @experiment),
+                params: { winner_version_id: @experiment.variant_b_version_id },
+                method: :post,
+                class: "dropdown__item" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<% if @experiment.concluded? && @experiment.winner_version %>
+  <%
+    winner_letter = @experiment.winner_version_id == @experiment.variant_a_version_id ? "A" : "B"
+  %>
+  <div class="card" style="background: var(--green-soft); border-color: var(--green); margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+    <span style="font-size: 18px;" aria-hidden="true">▸</span>
+    <div>
+      <p style="font-weight: 600; color: var(--green);">
+        Winner: Variant <%= winner_letter %> (v<%= @experiment.winner_version.version_number %>)
+      </p>
+      <% if @experiment.concluded_at %>
+        <p style="font-size: 13px; color: var(--t2);">
+          Concluded <%= time_ago_in_words(@experiment.concluded_at) %> ago
+        </p>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<div class="variant-cards">
+  <% [
+    [ "A", @experiment.variant_a_version, @variant_a_avg, @variant_a_count, "green", @experiment.winner_version_id == @experiment.variant_a_version_id ],
+    [ "B", @experiment.variant_b_version, @variant_b_avg, @variant_b_count, "amber", @experiment.winner_version_id == @experiment.variant_b_version_id ]
+  ].each do |letter, version, avg, count, tone, is_winner| %>
+    <div class="variant-card">
+      <div class="variant-card__header">
+        <span class="variant-card__label">Variant <%= letter %></span>
+        <span class="badge badge--<%= tone %>">v<%= version.version_number %></span>
+        <% if is_winner %><span class="badge badge--green">winner</span><% end %>
+      </div>
+      <div class="variant-card__content">
+        <pre style="font-family: var(--font-mono); font-size: 12px; line-height: 1.6; color: var(--t2); white-space: pre-wrap; margin: 0;"><%= version.content.to_s.truncate(240) %></pre>
+      </div>
+      <div class="variant-card__stats">
+        <div>
+          <span class="variant-card__stat-label">Requests</span>
+          <p class="variant-card__stat-value"><%= number_with_delimiter(count) %></p>
+        </div>
+        <div>
+          <span class="variant-card__stat-label">Avg score</span>
+          <p class="variant-card__stat-value"><%= avg || "—" %></p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if @variant_a_count.positive? || @variant_b_count.positive? %>
+  <div class="card" style="margin-top: 16px;">
+    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 16px;">Live results</h3>
+    <div class="results-bar">
+      <div class="results-bar__labels">
+        <span>Variant A: <strong><%= @variant_a_avg || "—" %></strong></span>
+        <span>Variant B: <strong><%= @variant_b_avg || "—" %></strong></span>
+      </div>
+      <%
+        total_score = (@variant_a_avg || 0) + (@variant_b_avg || 0)
+        a_pct = total_score.positive? ? ((@variant_a_avg || 0) / total_score * 100).round : 50
+      %>
+      <div class="results-bar__track">
+        <div class="results-bar__fill results-bar__fill--a" style="width: <%= a_pct %>%;"></div>
+        <div class="results-bar__fill results-bar__fill--b" style="width: <%= 100 - a_pct %>%;"></div>
+      </div>
+      <div class="results-bar__counts">
+        <span><%= number_with_delimiter(@variant_a_count) %> requests</span>
+        <span><%= number_with_delimiter(@variant_b_count) %> requests</span>
+      </div>
+    </div>
+    <div style="margin-top: 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--t3);">
+      Traffic split:
+      <span style="font-family: var(--font-mono); font-weight: 600; color: var(--t1);">
+        A: <%= @experiment.traffic_split %>% / B: <%= 100 - @experiment.traffic_split %>%
+      </span>
+    </div>
+  </div>
+<% end %>
+
+<div class="card" style="margin-top: 16px;">
+  <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 16px;">Statistical significance</h3>
+  <% if @significance %>
+    <% sig_pct = (@significance[:significance].to_f * 100).round(1) %>
+    <div class="significance-bar">
+      <div class="significance-bar__track">
+        <div class="significance-bar__fill"
+             style="width: <%= [ sig_pct, 100 ].min %>%; background: <%= sig_pct >= 95 ? 'var(--green)' : sig_pct >= 80 ? 'var(--amber)' : 'var(--t3)' %>;"></div>
+        <div class="significance-bar__threshold"></div>
+      </div>
+      <div class="significance-bar__labels">
+        <span style="font-family: var(--font-mono); font-size: 13px; font-weight: 600;"><%= sig_pct %>%</span>
+        <span style="font-size: 11px; color: var(--t3);">95% threshold</span>
+      </div>
+    </div>
+    <div style="margin-top: 12px; font-size: 13px;">
+      <% if @significance[:winner] == :a %>
+        <span style="color: var(--green); font-weight: 600;">Significant: Variant A wins</span>
+        <span style="color: var(--t3);"> · P(A wins) = <%= (@significance[:prob_a_wins] * 100).round(1) %>%</span>
+      <% elsif @significance[:winner] == :b %>
+        <span style="color: var(--green); font-weight: 600;">Significant: Variant B wins</span>
+        <span style="color: var(--t3);"> · P(B wins) = <%= (@significance[:prob_b_wins] * 100).round(1) %>%</span>
+      <% else %>
+        <% likely = @significance[:prob_a_wins] > @significance[:prob_b_wins] ? "A" : "B" %>
+        <% if sig_pct >= 80 %>
+          <span style="color: var(--amber); font-weight: 500;">Likely winner: Variant <%= likely %></span>
+          <span style="color: var(--t3);"> · Not yet statistically significant</span>
+        <% else %>
+          <span style="color: var(--t3);">Collecting data — not significant yet.</span>
+        <% end %>
+      <% end %>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; font-size: 12px;">
+      <% [
+        [ "P(A wins)", "#{(@significance[:prob_a_wins] * 100).round(1)}%" ],
+        [ "P(B wins)", "#{(@significance[:prob_b_wins] * 100).round(1)}%" ],
+        [ "A sample size", @significance[:stats_a][:n] ],
+        [ "B sample size", @significance[:stats_b][:n] ]
+      ].each do |label, value| %>
+        <div style="padding: 8px 12px; background: var(--card-hover); border-radius: var(--radius-sm); display: flex; justify-content: space-between;">
+          <span style="color: var(--t3);"><%= label %></span>
+          <span style="font-family: var(--font-mono); font-weight: 600;"><%= value %></span>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p style="color: var(--t3); font-size: 13px;">Not enough data to compute significance. Need at least 30 scored results per variant.</p>
+    <div class="significance-bar" style="margin-top: 12px;">
+      <div class="significance-bar__track">
+        <div class="significance-bar__fill" style="width: 0;"></div>
+        <div class="significance-bar__threshold"></div>
+      </div>
+      <div class="significance-bar__labels">
+        <span style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--t3);">—</span>
+        <span style="font-size: 11px; color: var(--t3);">95% threshold</span>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if @experiment.canary_stage %>
+  <div class="card" style="margin-top: 16px;">
+    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 16px;">Canary deployment</h3>
+    <div class="canary-steps">
+      <% [ 1, 10, 50, 100 ].each_with_index do |stage, idx| %>
+        <% active = @experiment.canary_stage && @experiment.canary_stage >= stage %>
+        <% current = @experiment.canary_stage == stage %>
+        <% if idx.positive? %>
+          <div class="canary-steps__line <%= 'canary-steps__line--active' if active %>"></div>
+        <% end %>
+        <div class="canary-steps__step <%= 'canary-steps__step--active' if active %> <%= 'canary-steps__step--current' if current %>">
+          <div class="canary-steps__dot"></div>
+          <span class="canary-steps__label"><%= stage %>%</span>
+        </div>
+      <% end %>
+    </div>
+    <% if @experiment.running? %>
+      <% next_stages = [ 1, 10, 50, 100 ].select { |s| s > @experiment.canary_stage.to_i } %>
+      <% if next_stages.any? %>
+        <div style="margin-top: 16px; display: flex; gap: 6px; flex-wrap: wrap;">
+          <% next_stages.each do |stage| %>
+            <%= button_to "Advance to #{stage}%",
+                  advance_canary_workspace_web_experiment_path(@workspace.slug, @experiment, stage: stage),
+                  method: :post,
+                  class: "btn btn--secondary btn--sm" %>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+    <% if @experiment.auto_rollback_threshold %>
+      <div style="margin-top: 12px; font-size: 12px; color: var(--t3); display: flex; align-items: center; gap: 6px;">
+        <span style="color: var(--red);" aria-hidden="true">⚠</span>
+        Auto-rollback threshold:
+        <strong style="font-family: var(--font-mono); color: var(--t1);"><%= @experiment.auto_rollback_threshold %></strong>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<div style="margin-top: 24px;">
+  <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Recent results</h3>
+  <% if @recent_results.any? %>
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <table class="data-table">
+        <thead>
+          <tr><th>Variant</th><th>Score</th><th>Log</th><th>Created</th></tr>
+        </thead>
+        <tbody>
+          <% @recent_results.each do |result| %>
+            <tr>
+              <td><span class="badge badge--<%= result.variant == 'a' ? 'green' : 'amber' %>"><%= result.variant.upcase %></span></td>
+              <td>
+                <% if result.score %>
+                  <% score_class = result.score >= 0.7 ? "score-cell--high" : result.score >= 0.4 ? "score-cell--mid" : "score-cell--low" %>
+                  <span class="<%= score_class %>" style="font-family: var(--font-mono); font-weight: 600;"><%= result.score.round(3) %></span>
+                <% else %>
+                  <span style="color: var(--t3);">pending</span>
+                <% end %>
+              </td>
+              <td>
+                <% if result.log %>
+                  <%= link_to result.log.request_id.to_s.truncate(12),
+                        workspace_web_log_path(@workspace.slug, result.log),
+                        style: "font-family: var(--font-mono); font-size: 12px; color: var(--accent);" %>
+                <% else %>
+                  <span style="color: var(--t3);">—</span>
+                <% end %>
+              </td>
+              <td style="color: var(--t3); font-size: 12px;"><%= time_ago_in_words(result.created_at) %> ago</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="card" style="text-align: center; padding: 40px 20px;">
+      <p style="color: var(--t3); font-size: 13px;">No results yet. They will appear as SDK calls are logged.</p>
+    </div>
+  <% end %>
+</div>

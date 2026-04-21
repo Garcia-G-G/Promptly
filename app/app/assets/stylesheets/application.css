@@ -922,3 +922,418 @@ select:focus {
   color: var(--red);
   margin-top: 4px;
 }
+
+/* ── Filter Tabs ── */
+
+.filter-tab {
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--t3);
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+}
+
+.filter-tab:hover {
+  background: var(--card-hover);
+  color: var(--t2);
+}
+
+.filter-tab--active {
+  background: var(--accent-light);
+  color: var(--accent);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Score Cell Colors ── */
+
+.score-cell--high { color: var(--green); }
+.score-cell--mid  { color: var(--amber); }
+.score-cell--low  { color: var(--red); }
+
+/* ── Variant cards ── */
+
+.variant-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.variant-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s;
+}
+
+.variant-card:hover { border-color: var(--t3); }
+
+.variant-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.variant-card__label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--t3);
+}
+
+.variant-card__content {
+  background: var(--bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-bottom: 16px;
+  min-height: 60px;
+  max-height: 120px;
+  overflow: hidden;
+}
+
+.variant-card__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.variant-card__stat-label {
+  font-size: 11px;
+  color: var(--t3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.variant-card__stat-value {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--t1);
+  margin-top: 2px;
+}
+
+/* ── Results bar ── */
+
+.results-bar__labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.results-bar__track {
+  display: flex;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--card-hover);
+}
+
+.results-bar__fill--a {
+  background: var(--green);
+  transition: width 0.3s ease;
+}
+
+.results-bar__fill--b {
+  background: var(--amber);
+  transition: width 0.3s ease;
+}
+
+.results-bar__counts {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--t3);
+}
+
+/* ── Significance bar ── */
+
+.significance-bar {
+  margin-top: 4px;
+}
+
+.significance-bar__track {
+  position: relative;
+  height: 8px;
+  background: var(--card-hover);
+  border-radius: 4px;
+}
+
+.significance-bar__fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.significance-bar__threshold {
+  position: absolute;
+  left: 95%;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--red);
+  border-radius: 1px;
+}
+
+.significance-bar__threshold::after {
+  content: "95%";
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--red);
+  white-space: nowrap;
+}
+
+.significance-bar__labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* ── Canary steps ── */
+
+.canary-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 8px 0;
+}
+
+.canary-steps__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.canary-steps__dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--card-border);
+  background: var(--card);
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.canary-steps__step--active .canary-steps__dot {
+  border-color: var(--green);
+  background: var(--green-soft);
+}
+
+.canary-steps__step--current .canary-steps__dot {
+  border-color: var(--green);
+  background: var(--green);
+  box-shadow: 0 0 0 4px var(--green-soft);
+}
+
+.canary-steps__label {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--t3);
+  font-weight: 500;
+}
+
+.canary-steps__step--active .canary-steps__label { color: var(--green); }
+.canary-steps__step--current .canary-steps__label { color: var(--green); font-weight: 700; }
+
+.canary-steps__line {
+  flex: 1;
+  height: 2px;
+  background: var(--card-border);
+  min-width: 40px;
+  margin-bottom: 22px;
+}
+
+.canary-steps__line--active { background: var(--green); }
+
+/* ── Dropdown (click-toggle) ── */
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown__menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  min-width: 220px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  padding: 8px;
+  z-index: 20;
+}
+
+.dropdown__label {
+  font-size: 11px;
+  color: var(--t3);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 8px;
+}
+
+.dropdown__item,
+.dropdown__item input[type="submit"],
+.dropdown__item button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 7px 10px;
+  background: transparent;
+  border: none;
+  color: var(--t1);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.dropdown__item:hover,
+.dropdown__item:focus-within {
+  background: var(--card-hover);
+}
+
+/* button_to wraps the submit in a form; remove default form margins */
+.dropdown__item form,
+.dropdown form {
+  margin: 0;
+}
+
+/* ── Range slider ── */
+
+.form-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--card-border);
+  border-radius: 3px;
+  outline: none;
+  border: none;
+  padding: 0;
+}
+
+.form-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  transition: transform 0.1s;
+}
+
+.form-range::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+.form-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+  .variant-cards { grid-template-columns: 1fr; }
+}
+
+/* ── Filter bar ── */
+
+.filter-bar {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-bar__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.filter-bar__group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-bar__group--actions {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  align-items: flex-end;
+  margin-left: auto;
+}
+
+.filter-bar__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--t3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.filter-bar__checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--t1);
+  padding-top: 12px;
+}
+
+.filter-bar__checkbox input {
+  width: auto;
+  margin: 0;
+}
+
+.filter-bar__input {
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--t1);
+  min-width: 130px;
+  font-family: var(--font-sans);
+}
+
+.filter-bar__input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+  outline: none;
+}
+

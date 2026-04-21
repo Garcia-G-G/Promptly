@@ -1,8 +1,26 @@
 <% content_for :page_title, "Experiments" %>
 
-<div class="page-header">
-  <h1>Experiments</h1>
-  <p><%= pluralize(@experiments.size, "experiment") %></p>
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+  <div>
+    <h1>Experiments</h1>
+    <p>A/B tests and canary deployments for your prompts.</p>
+  </div>
+  <%= link_to "New experiment", new_workspace_web_experiment_path(@workspace.slug), class: "btn btn--primary" %>
+</div>
+
+<div class="filter-tabs" style="display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap;">
+  <% [
+    [ nil,         "All",       @counts[:all] ],
+    [ "running",   "Running",   @counts[:running] ],
+    [ "draft",     "Draft",     @counts[:draft] ],
+    [ "concluded", "Concluded", @counts[:concluded] ]
+  ].each do |status, label, count| %>
+    <%= link_to workspace_web_experiments_path(@workspace.slug, status: status),
+          class: "filter-tab #{'filter-tab--active' if @status_filter.to_s == status.to_s}" do %>
+      <%= label %>
+      <span style="opacity: 0.6; font-family: var(--font-mono); font-size: 11px; margin-left: 4px;"><%= count %></span>
+    <% end %>
+  <% end %>
 </div>
 
 <% if @experiments.any? %>
@@ -13,27 +31,47 @@
           <th>Name</th>
           <th>Prompt</th>
           <th>Status</th>
-          <th>Environment</th>
-          <th>Traffic</th>
-          <th>Created</th>
+          <th>Variant A</th>
+          <th>Variant B</th>
+          <th>Split</th>
+          <th>Canary</th>
+          <th>Started</th>
         </tr>
       </thead>
       <tbody>
-        <% @experiments.each do |exp| %>
-          <tr>
-            <td style="font-weight: 500;"><%= exp.name %></td>
-            <td><code style="font-family: var(--font-mono);"><%= exp.prompt.slug %></code></td>
-            <td><span class="badge badge--<%= exp.status == 'running' ? 'amber' : exp.status == 'concluded' ? 'green' : 'blue' %>"><%= exp.status %></span></td>
-            <td><%= exp.environment %></td>
-            <td style="font-family: var(--font-mono); font-size: 12px;"><%= exp.traffic_split %>%</td>
-            <td style="color: var(--t3); font-size: 12px;"><%= time_ago_in_words(exp.created_at) %> ago</td>
+        <% @experiments.each do |experiment| %>
+          <tr onclick="Turbo.visit('<%= workspace_web_experiment_path(@workspace.slug, experiment) %>')" style="cursor: pointer;">
+            <td style="font-weight: 500;"><%= experiment.name %></td>
+            <td><code style="font-family: var(--font-mono); font-size: 12px;"><%= experiment.prompt.slug %></code></td>
+            <td><%= render "status_badge", status: experiment.status %></td>
+            <td style="font-family: var(--font-mono); font-size: 12px;">v<%= experiment.variant_a_version.version_number %></td>
+            <td style="font-family: var(--font-mono); font-size: 12px;">v<%= experiment.variant_b_version.version_number %></td>
+            <td style="font-family: var(--font-mono); font-size: 12px;"><%= experiment.traffic_split %>/<%= 100 - experiment.traffic_split %></td>
+            <td>
+              <% if experiment.canary_stage %>
+                <span class="badge badge--amber"><%= experiment.canary_stage %>%</span>
+              <% else %>
+                <span style="color: var(--t3);">—</span>
+              <% end %>
+            </td>
+            <td style="color: var(--t3); font-size: 12px;">
+              <%= experiment.started_at ? "#{time_ago_in_words(experiment.started_at)} ago" : "—" %>
+            </td>
           </tr>
         <% end %>
       </tbody>
     </table>
   </div>
 <% else %>
-  <div class="card" style="text-align: center; padding: 48px 20px;">
-    <p style="color: var(--t2); font-size: 14px;">No experiments yet. Create one from a prompt's detail page.</p>
+  <div class="card" style="text-align: center; padding: 60px 20px;">
+    <p style="font-size: 15px; color: var(--t2); margin-bottom: 8px;">
+      <% if @status_filter %>
+        No <%= @status_filter %> experiments yet.
+      <% else %>
+        No experiments yet.
+      <% end %>
+    </p>
+    <p style="font-size: 13px; color: var(--t3); margin-bottom: 20px;">Create an A/B test to compare prompt versions in production.</p>
+    <%= link_to "New experiment", new_workspace_web_experiment_path(@workspace.slug), class: "btn btn--primary" %>
   </div>
 <% end %>
