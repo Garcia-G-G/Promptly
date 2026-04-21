@@ -7,41 +7,124 @@
 
 <div class="stat-grid" data-controller="reveal" data-reveal-delay-value="0">
   <div class="stat-card" data-controller="tilt" data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
-    <div class="stat-card__label">SDK Calls</div>
-    <div class="stat-card__value"><%= @recent_logs_count || 0 %></div>
+    <div class="stat-card__label">SDK calls</div>
+    <div class="stat-card__value"><%= number_with_delimiter(@recent_logs_count || 0) %></div>
+    <div class="stat-card__change"><%= pluralize(@projects.count, "project") %></div>
   </div>
   <div class="stat-card" data-controller="tilt" data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
-    <div class="stat-card__label">Active Experiments</div>
-    <div class="stat-card__value"><%= @experiments&.count || 0 %></div>
+    <div class="stat-card__label">Active experiments</div>
+    <div class="stat-card__value"><%= @experiments.size %></div>
+    <div class="stat-card__change"><%= @experiments.any? ? "running" : "idle" %></div>
   </div>
   <div class="stat-card" data-controller="tilt" data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
-    <div class="stat-card__label">Avg Score</div>
-    <div class="stat-card__value">--</div>
+    <div class="stat-card__label">Avg score</div>
+    <div class="stat-card__value"><%= @avg_score || "—" %></div>
+    <div class="stat-card__change">across scored calls</div>
   </div>
   <div class="stat-card" data-controller="tilt" data-action="mousemove->tilt#mousemove mouseleave->tilt#mouseleave">
-    <div class="stat-card__label">Projects</div>
-    <div class="stat-card__value"><%= @projects.count %></div>
+    <div class="stat-card__label">p95 latency</div>
+    <div class="stat-card__value"><%= @p95_latency ? "#{@p95_latency}ms" : "—" %></div>
+    <div class="stat-card__change"><%= @p95_latency && @p95_latency < 25 ? "< budget" : "budget 25ms" %></div>
   </div>
 </div>
 
+<% if @experiments.any? %>
+  <div class="page-header" style="margin-top: 32px;">
+    <h2 style="font-size: 16px; font-weight: 600;">Running experiments</h2>
+  </div>
+  <% @experiments.each do |exp| %>
+    <%
+      scores_by_variant = exp.experiment_results.group(:variant).average(:score)
+      counts_by_variant = exp.experiment_results.group(:variant).count
+      score_a = scores_by_variant["a"]&.round(2)
+      score_b = scores_by_variant["b"]&.round(2)
+      n_a = counts_by_variant["a"] || 0
+      n_b = counts_by_variant["b"] || 0
+      total = n_a + n_b
+      leading = if score_a && score_b
+                  score_b > score_a ? "b" : (score_a > score_b ? "a" : nil)
+                end
+    %>
+    <div class="experiment-card" style="margin-bottom: 12px;">
+      <div class="experiment-card__header">
+        <div class="experiment-card__title">
+          <div class="experiment-card__live-dot" aria-hidden="true"></div>
+          <span style="font-weight: 600; font-size: 13px;"><%= exp.name %></span>
+          <span style="color: var(--t3); font-size: 12px;">on</span>
+          <code style="font-family: var(--font-mono); font-size: 12px;"><%= exp.prompt.slug %></code>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <span class="badge badge--amber"><%= exp.traffic_split %> / <%= 100 - exp.traffic_split %></span>
+          <% if exp.canary_stage %>
+            <span class="badge badge--amber">canary <%= exp.canary_stage %>%</span>
+          <% end %>
+        </div>
+      </div>
+      <div class="experiment-card__grid" style="grid-template-columns: 1fr 1fr 1fr;">
+        <% [ [ "a", "Variant A", score_a, n_a ], [ "b", "Variant B", score_b, n_b ] ].each do |id, label, score, calls| %>
+          <div>
+            <div class="experiment-card__variant-label" style="display: flex; align-items: center; gap: 6px;">
+              <%= label %>
+              <% if leading == id %><span class="badge badge--green">leading</span><% end %>
+            </div>
+            <div class="experiment-card__variant-value"><%= score || "—" %></div>
+            <div style="font-family: var(--font-mono); font-size: 12px; color: var(--t3); margin-top: 4px;"><%= number_with_delimiter(calls) %> calls</div>
+          </div>
+        <% end %>
+        <div>
+          <div class="experiment-card__variant-label">Calls</div>
+          <div class="experiment-card__variant-value"><%= number_with_delimiter(total) %></div>
+          <div style="font-family: var(--font-mono); font-size: 12px; color: var(--t3); margin-top: 4px;">this experiment</div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+<% end %>
+
 <% if @prompts.any? %>
   <div class="page-header" style="margin-top: 32px;">
-    <h2 style="font-size: 16px; font-weight: 600;">Recent Prompts</h2>
+    <h2 style="font-size: 16px; font-weight: 600;">Recent prompts</h2>
   </div>
 
-  <div class="prompt-grid">
-    <% @prompts.each do |prompt| %>
-      <% prod_version = prompt.prompt_versions.find { |v| v.environment == "production" } %>
-      <%= link_to workspace_web_prompt_path(@workspace.slug, prompt.slug), class: "prompt-card card", style: "text-decoration: none; color: inherit;", data: { controller: "tilt", action: "mousemove->tilt#mousemove mouseleave->tilt#mouseleave" } do %>
-        <div class="prompt-card__slug"><%= prompt.slug %></div>
-        <div class="prompt-card__desc"><%= prompt.description %></div>
-        <div class="prompt-card__meta">
-          <% if prod_version %>
-            <span class="badge badge--green">production v<%= prod_version.version_number %></span>
-          <% end %>
-          <span style="font-size: 12px; color: var(--t3);"><%= prompt.project.name %></span>
-        </div>
-      <% end %>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Slug</th>
+          <th>Project</th>
+          <th>Environment</th>
+          <th>Version</th>
+          <th>Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @prompts.each do |prompt| %>
+          <% prod_version = prompt.prompt_versions.find { |v| v.environment == "production" } %>
+          <% latest = prompt.prompt_versions.max_by(&:version_number) %>
+          <tr onclick="Turbo.visit('<%= workspace_web_prompt_path(@workspace.slug, prompt.slug) %>')" style="cursor: pointer;">
+            <td><code style="font-family: var(--font-mono); font-weight: 500;"><%= prompt.slug %></code></td>
+            <td style="color: var(--t2);"><%= prompt.project.name %></td>
+            <td>
+              <% if prod_version %>
+                <span class="badge badge--green">production</span>
+              <% else %>
+                <span class="badge badge--blue">dev</span>
+              <% end %>
+            </td>
+            <td style="font-family: var(--font-mono);">v<%= (prod_version || latest)&.version_number || 0 %></td>
+            <td style="color: var(--t3); font-size: 12px;"><%= time_ago_in_words(prompt.updated_at) %> ago</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="card" style="margin-top: 32px; text-align: center; padding: 48px 20px;">
+    <p style="color: var(--t2); font-size: 14px; margin-bottom: 16px;">No prompts yet in this workspace.</p>
+    <% if @projects.any? %>
+      <%= link_to "Create your first prompt", new_workspace_project_prompt_path(@workspace.slug, @projects.first.slug), class: "btn btn--primary" %>
+    <% else %>
+      <%= link_to "Create a project", new_workspace_project_path(@workspace.slug), class: "btn btn--primary" %>
     <% end %>
   </div>
 <% end %>
