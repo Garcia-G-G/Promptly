@@ -1,9 +1,20 @@
 <% content_for :page_title, @prompt.slug %>
 
-<div class="page-header">
-  <%= link_to "&larr; Prompts".html_safe, workspace_web_prompts_path(@workspace.slug), style: "font-size: 13px; color: var(--t3); text-decoration: none;" %>
-  <h1 style="font-family: var(--font-mono);"><%= @prompt.slug %></h1>
-  <p><%= @prompt.description %></p>
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+  <div>
+    <%= link_to "&larr; Prompts".html_safe, workspace_web_prompts_path(@workspace.slug),
+          style: "font-size: 13px; color: var(--t3); text-decoration: none;" %>
+    <h1 style="font-family: var(--font-mono);"><%= @prompt.slug %></h1>
+    <p><%= @prompt.description.presence || "No description" %></p>
+  </div>
+  <div style="display: flex; gap: 6px;">
+    <%= link_to "New version", new_workspace_web_prompt_version_path(@workspace.slug, @prompt.slug),
+          class: "btn btn--primary btn--sm" %>
+    <% if @prompt.prompt_versions.count > 1 %>
+      <%= link_to "View diff", diff_workspace_web_prompt_path(@workspace.slug, @prompt.slug),
+            class: "btn btn--secondary btn--sm" %>
+    <% end %>
+  </div>
 </div>
 
 <div class="env-grid">
@@ -28,6 +39,16 @@
         <% else %>
           <div style="font-size: 13px; color: var(--t3); margin-top: 8px;">No version</div>
         <% end %>
+
+        <% if @current_version && env != "dev" && @current_version != version %>
+          <%= button_to "Promote latest &rarr; #{env}".html_safe,
+                promote_workspace_web_prompt_path(@workspace.slug, @prompt.slug),
+                params: { version_id: @current_version.id, to_environment: env },
+                method: :post,
+                class: "btn btn--secondary btn--sm",
+                style: "width: 100%; margin-top: 12px;",
+                data: { turbo_confirm: "Promote v#{@current_version.version_number} to #{env}?" } %>
+        <% end %>
       </div>
     </div>
   <% end %>
@@ -36,10 +57,8 @@
 <% if @current_version %>
   <div style="margin-top: 24px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <h2 style="font-size: 16px; font-weight: 600;">Prompt Content</h2>
-      <% if @prompt.prompt_versions.count > 1 %>
-        <%= link_to "View diff &rarr;".html_safe, diff_workspace_web_prompt_path(@workspace.slug, @prompt.slug), class: "btn btn--secondary btn--sm" %>
-      <% end %>
+      <h2 style="font-size: 16px; font-weight: 600;">Prompt content</h2>
+      <span style="font-family: var(--font-mono); font-size: 12px; color: var(--t3);">v<%= @current_version.version_number %> · <%= @current_version.environment %></span>
     </div>
 
     <div class="prompt-content">
@@ -71,3 +90,33 @@
     </div>
   <% end %>
 <% end %>
+
+<div style="margin-top: 32px;">
+  <h2 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Version history</h2>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Version</th>
+          <th>Environment</th>
+          <th>Hash</th>
+          <th>Author</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @all_versions.each do |v| %>
+          <tr>
+            <td style="font-family: var(--font-mono); font-weight: 600;">v<%= v.version_number %></td>
+            <td>
+              <span class="badge badge--<%= v.environment == 'production' ? 'green' : v.environment == 'staging' ? 'amber' : v.environment == 'archived' ? 'red' : 'blue' %>"><%= v.environment %></span>
+            </td>
+            <td style="font-family: var(--font-mono); font-size: 12px; color: var(--t3);"><%= v.content_hash[0..11] %></td>
+            <td style="color: var(--t2); font-size: 13px;"><%= v.created_by&.name || "—" %></td>
+            <td style="color: var(--t3); font-size: 12px;"><%= time_ago_in_words(v.created_at) %> ago</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
