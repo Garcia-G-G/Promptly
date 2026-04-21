@@ -922,3 +922,37 @@ select:focus {
   color: var(--red);
   margin-top: 4px;
 }
+
+/* ── Filter Tabs ── */
+
+.filter-tab {
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--t3);
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+}
+
+.filter-tab:hover {
+  background: var(--card-hover);
+  color: var(--t2);
+}
+
+.filter-tab--active {
+  background: var(--accent-light);
+  color: var(--accent);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Score Cell Colors ── */
+
+.score-cell--high { color: var(--green); }
+.score-cell--mid  { color: var(--amber); }
+.score-cell--low  { color: var(--red); }
+
