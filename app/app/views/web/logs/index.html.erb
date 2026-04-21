@@ -1,0 +1,39 @@
+<% content_for :page_title, "Logs" %>
+
+<div class="page-header">
+  <h1>Logs</h1>
+  <p>Most recent 100 SDK calls</p>
+</div>
+
+<% if @logs.any? %>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Prompt</th>
+          <th>Variant</th>
+          <th>Score</th>
+          <th>Latency</th>
+          <th>Tokens</th>
+          <th>When</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @logs.each do |log| %>
+          <tr>
+            <td><code style="font-family: var(--font-mono);"><%= log.prompt&.slug || "—" %></code></td>
+            <td><%= log.variant || "—" %></td>
+            <td style="font-family: var(--font-mono); font-weight: 600;"><%= log.score&.round(2) || "—" %></td>
+            <td style="font-family: var(--font-mono); font-size: 12px;"><%= log.latency_ms %>ms</td>
+            <td style="font-family: var(--font-mono); font-size: 12px; color: var(--t3);"><%= log.tokens&.dig("input") %>/<%= log.tokens&.dig("output") %></td>
+            <td style="color: var(--t3); font-size: 12px;"><%= time_ago_in_words(log.created_at) %> ago</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="card" style="text-align: center; padding: 48px 20px;">
+    <p style="color: var(--t2); font-size: 14px;">No logs yet. They'll appear here once your app calls <code>Promptly.log</code>.</p>
+  </div>
+<% end %>

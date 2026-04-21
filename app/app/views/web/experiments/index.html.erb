@@ -1,0 +1,39 @@
+<% content_for :page_title, "Experiments" %>
+
+<div class="page-header">
+  <h1>Experiments</h1>
+  <p><%= pluralize(@experiments.size, "experiment") %></p>
+</div>
+
+<% if @experiments.any? %>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Prompt</th>
+          <th>Status</th>
+          <th>Environment</th>
+          <th>Traffic</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @experiments.each do |exp| %>
+          <tr>
+            <td style="font-weight: 500;"><%= exp.name %></td>
+            <td><code style="font-family: var(--font-mono);"><%= exp.prompt.slug %></code></td>
+            <td><span class="badge badge--<%= exp.status == 'running' ? 'amber' : exp.status == 'concluded' ? 'green' : 'blue' %>"><%= exp.status %></span></td>
+            <td><%= exp.environment %></td>
+            <td style="font-family: var(--font-mono); font-size: 12px;"><%= exp.traffic_split %>%</td>
+            <td style="color: var(--t3); font-size: 12px;"><%= time_ago_in_words(exp.created_at) %> ago</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="card" style="text-align: center; padding: 48px 20px;">
+    <p style="color: var(--t2); font-size: 14px;">No experiments yet. Create one from a prompt's detail page.</p>
+  </div>
+<% end %>

@@ -1,0 +1,30 @@
+<% content_for :page_title, "Scorers" %>
+
+<div class="page-header">
+  <h1>Scorers</h1>
+  <p><%= pluralize(@scorers.size, "scorer") %></p>
+</div>
+
+<% if @scorers.any? %>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="data-table">
+      <thead>
+        <tr><th>Name</th><th>Type</th><th>Project</th><th>Created</th></tr>
+      </thead>
+      <tbody>
+        <% @scorers.each do |sc| %>
+          <tr>
+            <td style="font-weight: 500;"><%= sc.name %></td>
+            <td><span class="badge badge--blue"><%= sc.scorer_type %></span></td>
+            <td><%= sc.project.name %></td>
+            <td style="color: var(--t3); font-size: 12px;"><%= time_ago_in_words(sc.created_at) %> ago</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="card" style="text-align: center; padding: 48px 20px;">
+    <p style="color: var(--t2); font-size: 14px;">No scorers yet. Create one via the API to attach automated scoring to your prompts.</p>
+  </div>
+<% end %>

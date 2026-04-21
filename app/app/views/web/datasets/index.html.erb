@@ -1,0 +1,30 @@
+<% content_for :page_title, "Datasets" %>
+
+<div class="page-header">
+  <h1>Datasets</h1>
+  <p><%= pluralize(@datasets.size, "dataset") %></p>
+</div>
+
+<% if @datasets.any? %>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="data-table">
+      <thead>
+        <tr><th>Name</th><th>Project</th><th>Rows</th><th>Created</th></tr>
+      </thead>
+      <tbody>
+        <% @datasets.each do |ds| %>
+          <tr>
+            <td style="font-weight: 500;"><%= ds.name %></td>
+            <td><%= ds.project.name %></td>
+            <td style="font-family: var(--font-mono);"><%= ds.dataset_rows.size %></td>
+            <td style="color: var(--t3); font-size: 12px;"><%= time_ago_in_words(ds.created_at) %> ago</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="card" style="text-align: center; padding: 48px 20px;">
+    <p style="color: var(--t2); font-size: 14px;">No datasets yet. Upload one via the API to run evals.</p>
+  </div>
+<% end %>

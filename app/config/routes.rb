@@ -4,13 +4,23 @@ Rails.application.routes.draw do
   root "marketing#index"
 
   resources :workspaces, param: :slug, only: [ :new, :create, :show ] do
-    resources :projects, param: :slug, only: [ :index, :show, :new, :create ]
+    resources :projects, param: :slug, only: [ :index, :show, :new, :create ] do
+      resources :prompts, only: [ :new, :create ], controller: "web/project_prompts"
+    end
 
     # Web dashboard
     namespace :web do
-      resources :prompts, only: [ :index, :show ], param: :id do
+      resources :prompts, only: [ :index, :show ], param: :slug do
         get :diff, on: :member
+        post :promote, on: :member
+        resources :versions, only: [ :new, :create ], controller: "prompt_versions"
       end
+      resources :experiments, only: [ :index ]
+      resources :logs, only: [ :index ]
+      resources :datasets, only: [ :index ]
+      resources :scorers, only: [ :index ]
+      resources :eval_runs, only: [ :index ]
+      resource :settings, only: [ :show ]
     end
   end
 

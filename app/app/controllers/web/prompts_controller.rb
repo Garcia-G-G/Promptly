@@ -27,7 +27,7 @@ module Web
     def set_prompt
       @prompt = Prompt.joins(:project)
         .where(projects: { workspace_id: @workspace.id })
-        .find_by!(slug: params[:id])
+        .find_by!(slug: params[:slug])
     end
   end
 end
