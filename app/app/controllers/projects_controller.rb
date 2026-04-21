@@ -7,6 +7,7 @@ class ProjectsController < ApplicationController
 
   def show
     @project = @workspace.projects.find_by!(slug: params[:slug])
+    @prompts = @project.prompts.includes(:prompt_versions).order(updated_at: :desc)
   end
 
   def new

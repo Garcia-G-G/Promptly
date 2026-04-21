@@ -1,0 +1,42 @@
+<% content_for :page_title, "Settings" %>
+
+<div class="page-header">
+  <h1>Settings</h1>
+  <p><%= @workspace.name %></p>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+  <div class="card">
+    <h2 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Team</h2>
+    <% @memberships.each do |m| %>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--card-border);">
+        <div>
+          <div style="font-weight: 500; font-size: 13px;"><%= m.user.name %></div>
+          <div style="font-size: 12px; color: var(--t3);"><%= m.user.email %></div>
+        </div>
+        <span class="badge badge--blue"><%= m.role %></span>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">API Keys</h2>
+    <% if @api_keys.any? %>
+      <% @api_keys.each do |key| %>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--card-border);">
+          <div>
+            <div style="font-weight: 500; font-size: 13px;"><%= key.name %></div>
+            <div style="font-family: var(--font-mono); font-size: 11px; color: var(--t3);"><%= key.key_prefix %>…</div>
+          </div>
+          <% if key.revoked_at %>
+            <span class="badge badge--red">revoked</span>
+          <% else %>
+            <span class="badge badge--green">active</span>
+          <% end %>
+        </div>
+      <% end %>
+    <% else %>
+      <p style="font-size: 13px; color: var(--t3);">No API keys yet.</p>
+    <% end %>
+  </div>
+</div>

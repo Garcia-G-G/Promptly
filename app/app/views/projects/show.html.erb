@@ -1,5 +1,50 @@
-<h1><%= @project.name %></h1>
-<p>Workspace: <%= @workspace.name %></p>
-<p>Slug: <code><%= @project.slug %></code></p>
+<% content_for :page_title, @project.name %>
 
-<%= link_to "Back to Projects", workspace_projects_path(@workspace.slug) %>
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+  <div>
+    <%= link_to "&larr; #{@workspace.name}".html_safe, workspace_path(@workspace.slug), style: "font-size: 13px; color: var(--t3); text-decoration: none;" %>
+    <h1><%= @project.name %></h1>
+    <p style="font-family: var(--font-mono); font-size: 13px; color: var(--t3);"><%= @project.slug %></p>
+  </div>
+  <%= link_to "New prompt", new_workspace_project_prompt_path(@workspace.slug, @project.slug), class: "btn btn--primary" %>
+</div>
+
+<% if @prompts.any? %>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Slug</th>
+          <th>Description</th>
+          <th>Environment</th>
+          <th>Version</th>
+          <th>Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @prompts.each do |prompt| %>
+          <% prod_version = prompt.prompt_versions.find { |v| v.environment == "production" } %>
+          <% latest = prompt.prompt_versions.max_by(&:version_number) %>
+          <tr onclick="Turbo.visit('<%= workspace_web_prompt_path(@workspace.slug, prompt.slug) %>')" style="cursor: pointer;">
+            <td><code style="font-family: var(--font-mono); font-weight: 500;"><%= prompt.slug %></code></td>
+            <td style="color: var(--t2); max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= prompt.description %></td>
+            <td>
+              <% if prod_version %>
+                <span class="badge badge--green">production</span>
+              <% else %>
+                <span class="badge badge--blue">dev</span>
+              <% end %>
+            </td>
+            <td style="font-family: var(--font-mono);">v<%= (prod_version || latest)&.version_number || 0 %></td>
+            <td style="color: var(--t3); font-size: 12px;"><%= time_ago_in_words(prompt.updated_at) %> ago</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="card" style="text-align: center; padding: 60px 20px;">
+    <p style="font-size: 15px; color: var(--t2); margin-bottom: 16px;">No prompts yet in this project.</p>
+    <%= link_to "Create your first prompt", new_workspace_project_prompt_path(@workspace.slug, @project.slug), class: "btn btn--primary" %>
+  </div>
+<% end %>

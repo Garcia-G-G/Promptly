@@ -1,7 +1,9 @@
 <aside class="sidebar">
   <div class="sidebar__logo">
-    <div class="sidebar__logo-icon">P</div>
-    <span class="sidebar__logo-text">Promptly</span>
+    <%= link_to workspace_path(current_workspace.slug), style: "display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;" do %>
+      <div class="sidebar__logo-icon">P</div>
+      <span class="sidebar__logo-text">Promptly</span>
+    <% end %>
   </div>
 
   <div class="sidebar__workspace-selector">
@@ -10,8 +12,12 @@
   </div>
 
   <nav class="sidebar__nav">
-    <%= sidebar_link "Overview", "&#9707;", workspace_path(current_workspace.slug) %>
-    <%= sidebar_link "Prompts", "&#9109;", workspace_web_prompts_path(current_workspace.slug) %>
+    <%= sidebar_link "Overview",    "&#9707;", workspace_path(current_workspace.slug) %>
+    <%= sidebar_link "Prompts",     "&#9109;", workspace_web_prompts_path(current_workspace.slug), count: @prompt_count %>
+    <%= sidebar_link "Experiments", "&#8652;", workspace_web_experiments_path(current_workspace.slug), count: @experiment_count %>
+    <%= sidebar_link "Logs",        "&#9636;", workspace_web_logs_path(current_workspace.slug) %>
+    <%= sidebar_link "Datasets",    "&#9776;", workspace_web_datasets_path(current_workspace.slug) %>
+    <%= sidebar_link "Scorers",     "&#9733;", workspace_web_scorers_path(current_workspace.slug) %>
   </nav>
 
   <div class="sidebar__spacer"></div>
@@ -21,9 +27,9 @@
       <div class="sidebar__status-dot"></div>
       <span>All systems nominal</span>
     </div>
-    <div class="sidebar__user">
+    <%= link_to workspace_web_settings_path(current_workspace.slug), class: "sidebar__user", style: "text-decoration: none; color: inherit;" do %>
       <div class="sidebar__user-avatar"><%= current_user.name.to_s.first&.upcase || "?" %></div>
       <span><%= current_user.name %></span>
-    </div>
+    <% end %>
   </div>
 </aside>

@@ -1,0 +1,56 @@
+<% content_for :page_title, "New prompt" %>
+
+<div class="page-header">
+  <%= link_to "&larr; #{@project.name}".html_safe, workspace_project_path(@workspace.slug, @project.slug),
+        style: "font-size: 13px; color: var(--t3); text-decoration: none;" %>
+  <h1>New prompt</h1>
+  <p>Creates the prompt and its first version (v1) in <code style="font-family: var(--font-mono);">dev</code>.</p>
+</div>
+
+<div class="card" style="max-width: 680px;">
+  <%= form_with model: @prompt,
+        url: workspace_project_prompts_path(@workspace.slug, @project.slug),
+        class: "form",
+        local: true do |f| %>
+    <div class="form-group">
+      <%= f.label :slug, class: "form-label" %>
+      <%= f.text_field :slug,
+            placeholder: "doc-summarizer",
+            class: "form-input",
+            style: "font-family: var(--font-mono);",
+            autocomplete: "off" %>
+      <p class="form-hint">Unique within the project. Lowercase letters, numbers, and hyphens.</p>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :description, class: "form-label" %>
+      <%= f.text_field :description,
+            placeholder: "Summarizes documents in the specified language and format",
+            class: "form-input" %>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Prompt content</label>
+      <textarea name="prompt[content]"
+                rows="12"
+                placeholder="You are a document summarizer.&#10;&#10;Summarize the following document in {language}.&#10;Format: {length}."
+                class="form-input"
+                style="font-family: var(--font-mono); font-size: 13px; line-height: 1.8; resize: vertical;"></textarea>
+      <p class="form-hint">Use <code>{variable_name}</code> for template variables. They'll be auto-detected.</p>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Model hint</label>
+      <select name="prompt[model_hint]" class="form-input">
+        <option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>
+        <option value="claude-haiku-4-5">Claude Haiku 4.5</option>
+        <option value="">No preference</option>
+      </select>
+    </div>
+
+    <div style="display: flex; gap: 8px; margin-top: 24px;">
+      <%= f.submit "Create prompt", class: "btn btn--primary" %>
+      <%= link_to "Cancel", workspace_project_path(@workspace.slug, @project.slug), class: "btn btn--secondary" %>
+    </div>
+  <% end %>
+</div>

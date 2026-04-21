@@ -6,5 +6,10 @@
   </div>
   <div class="top-bar__actions">
     <div class="cmd-k"><span class="cmd-k__key">&#8984;</span> K</div>
+    <% if current_workspace.projects.any? %>
+      <%= link_to "New prompt",
+            new_workspace_project_prompt_path(current_workspace.slug, current_workspace.projects.first.slug),
+            class: "btn btn--primary btn--sm" %>
+    <% end %>
   </div>
 </div>
