@@ -1264,3 +1264,76 @@ select:focus {
   .variant-cards { grid-template-columns: 1fr; }
 }
 
+/* ── Filter bar ── */
+
+.filter-bar {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-bar__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.filter-bar__group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-bar__group--actions {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  align-items: flex-end;
+  margin-left: auto;
+}
+
+.filter-bar__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--t3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.filter-bar__checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--t1);
+  padding-top: 12px;
+}
+
+.filter-bar__checkbox input {
+  width: auto;
+  margin: 0;
+}
+
+.filter-bar__input {
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--t1);
+  min-width: 130px;
+  font-family: var(--font-sans);
+}
+
+.filter-bar__input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+  outline: none;
+}
+

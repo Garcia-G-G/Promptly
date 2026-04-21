@@ -1,0 +1,150 @@
+<% content_for :page_title, "Log #{@log.request_id.to_s.truncate(12)}" %>
+
+<div class="page-header">
+  <%= link_to "&larr; Logs".html_safe, workspace_web_logs_path(@workspace.slug),
+        style: "font-size: 13px; color: var(--t3); text-decoration: none;" %>
+  <h1 style="font-family: var(--font-mono); font-size: 18px; margin-top: 4px;"><%= @log.request_id %></h1>
+  <p style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+    <%= @log.created_at.strftime("%B %d, %Y at %H:%M:%S UTC") %>
+    <span style="color: var(--t3);">·</span>
+    Prompt:
+    <%= link_to @log.prompt.slug,
+          workspace_web_prompt_path(@workspace.slug, @log.prompt.slug),
+          style: "color: var(--accent); font-family: var(--font-mono);" %>
+    <span style="color: var(--t3);">·</span>
+    <span class="badge badge--blue">v<%= @log.prompt_version.version_number %></span>
+  </p>
+</div>
+
+<% if @log.experiment %>
+  <div class="card" style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+    <span style="font-size: 14px;" aria-hidden="true">⇆</span>
+    <div style="flex: 1;">
+      <p style="font-size: 13px; color: var(--t2);">
+        Part of experiment:
+        <%= link_to @log.experiment.name,
+              workspace_web_experiment_path(@workspace.slug, @log.experiment),
+              style: "color: var(--accent); font-weight: 500;" %>
+      </p>
+    </div>
+    <% if @log.variant %>
+      <span class="badge badge--<%= @log.variant == 'a' ? 'green' : 'amber' %>">Variant <%= @log.variant.upcase %></span>
+    <% end %>
+  </div>
+<% end %>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
+  <div class="card">
+    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Input variables</h3>
+    <% if @log.input_vars.is_a?(Hash) && @log.input_vars.any? %>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <% @log.input_vars.each do |key, value| %>
+          <div style="display: flex; gap: 8px; font-size: 13px;">
+            <span style="font-family: var(--font-mono); font-weight: 500; color: var(--accent); min-width: 120px; flex-shrink: 0;"><%= key %></span>
+            <span style="color: var(--t2); word-break: break-word;"><%= value.to_s.truncate(300) %></span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p style="color: var(--t3); font-size: 13px;">No input variables recorded.</p>
+    <% end %>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Metadata</h3>
+    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: var(--t3);">Latency</span>
+        <span style="font-family: var(--font-mono); font-weight: 600;"><%= @log.latency_ms ? "#{@log.latency_ms}ms" : "—" %></span>
+      </div>
+
+      <% if @tokens.any? %>
+        <%
+          prompt_tokens = @tokens[:prompt] || @tokens[:input]
+          completion_tokens = @tokens[:completion] || @tokens[:output]
+          total_tokens = @tokens[:total] || (prompt_tokens.to_i + completion_tokens.to_i)
+        %>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--t3);">Prompt tokens</span>
+          <span style="font-family: var(--font-mono);"><%= prompt_tokens || "—" %></span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--t3);">Completion tokens</span>
+          <span style="font-family: var(--font-mono);"><%= completion_tokens || "—" %></span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--t3);">Total tokens</span>
+          <span style="font-family: var(--font-mono); font-weight: 600;"><%= total_tokens %></span>
+        </div>
+      <% end %>
+
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: var(--t3);">Model</span>
+        <span style="font-family: var(--font-mono); font-size: 12px;"><%= @log.model_version || "—" %></span>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: var(--t3);">Score</span>
+        <% if @log.score %>
+          <% score_class = @log.score >= 0.7 ? "score-cell--high" : @log.score >= 0.4 ? "score-cell--mid" : "score-cell--low" %>
+          <span class="<%= score_class %>" style="font-family: var(--font-mono); font-weight: 600;"><%= @log.score.round(3) %></span>
+        <% else %>
+          <span style="color: var(--t3);">—</span>
+        <% end %>
+      </div>
+
+      <% if @log.score_rationale.present? %>
+        <div style="border-top: 1px solid var(--card-border); padding-top: 8px; margin-top: 4px;">
+          <span style="color: var(--t3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Score rationale</span>
+          <p style="color: var(--t2); margin-top: 4px; font-size: 12px; line-height: 1.5;"><%= @log.score_rationale %></p>
+        </div>
+      <% end %>
+
+      <% if @log.scorer %>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--t3);">Scorer</span>
+          <span style="font-size: 12px;"><%= @log.scorer.name %></span>
+        </div>
+      <% end %>
+
+      <% if @log.otel_trace_id.present? %>
+        <div style="border-top: 1px solid var(--card-border); padding-top: 8px; margin-top: 4px;">
+          <span style="color: var(--t3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">OpenTelemetry</span>
+          <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 2px;">
+            <div style="display: flex; justify-content: space-between; font-size: 11px;">
+              <span style="color: var(--t3);">Trace ID</span>
+              <code style="font-family: var(--font-mono); font-size: 10px; color: var(--t2);"><%= @log.otel_trace_id %></code>
+            </div>
+            <% if @log.otel_span_id.present? %>
+              <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span style="color: var(--t3);">Span ID</span>
+                <code style="font-family: var(--font-mono); font-size: 10px; color: var(--t2);"><%= @log.otel_span_id %></code>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <h3 style="font-size: 14px; font-weight: 600;">Output</h3>
+    <%= link_to "Open prompt",
+          workspace_web_prompt_path(@workspace.slug, @log.prompt.slug),
+          class: "btn btn--secondary btn--sm" %>
+  </div>
+  <% if @log.output.present? %>
+    <div class="prompt-content">
+      <% @log.output.lines.each_with_index do |line, idx| %>
+        <div class="prompt-content__line">
+          <span class="prompt-content__num"><%= idx + 1 %></span>
+          <span class="prompt-content__text"><%= line.chomp %></span>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div style="padding: 20px; text-align: center; color: var(--t3); font-size: 13px;">No output recorded.</div>
+  <% end %>
+</div>
