@@ -50,7 +50,9 @@ module Api
       private
 
       def set_experiment
-        @experiment = Experiment.find(params[:id])
+        @experiment = Experiment.joins(prompt: { project: :workspace })
+          .where(workspaces: { id: current_workspace.id })
+          .find(params[:id])
       end
     end
   end
