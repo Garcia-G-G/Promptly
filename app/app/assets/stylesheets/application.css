@@ -1465,3 +1465,67 @@ select:focus {
   .type-selector { grid-template-columns: 1fr 1fr; }
 }
 
+/* ── Progress bar ── */
+
+.progress-bar {
+  height: 6px;
+  background: var(--card-border);
+  border-radius: 3px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.progress-bar--lg {
+  height: 10px;
+  width: 100%;
+  border-radius: 5px;
+  display: block;
+}
+
+.progress-bar__fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+  transition: width 0.4s ease;
+}
+
+.progress-bar__fill--animated {
+  background: linear-gradient(90deg, var(--accent) 0%, #f59e0b 50%, var(--accent) 100%);
+  background-size: 200% 100%;
+  animation: progress-shimmer 1.5s linear infinite;
+}
+
+@keyframes progress-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Score display ── */
+
+.score-display {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.score-display--lg   { font-size: 28px; }
+.score-display--good { color: var(--green); }
+.score-display--mid  { color: var(--amber); }
+.score-display--bad  { color: var(--red); }
+
+/* ── Badge pulse (running status) ── */
+
+.badge--pulse { animation: badge-pulse 1.5s ease-in-out infinite; }
+
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge--pulse,
+  .progress-bar__fill--animated { animation: none !important; }
+}
+

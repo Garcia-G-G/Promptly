@@ -1,32 +1,124 @@
 <% content_for :page_title, "Eval Runs" %>
 
-<div class="page-header">
-  <h1>Eval Runs</h1>
-  <p><%= pluralize(@eval_runs.size, "run") %></p>
+<% status_colors = { "queued" => "blue", "running" => "amber", "done" => "green", "failed" => "red" } %>
+
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+  <div>
+    <h1>Eval Runs</h1>
+    <p style="color: var(--t2); font-size: 14px; margin-top: 4px;">Evaluate prompt versions against datasets using scorers.</p>
+  </div>
+  <%= link_to "New eval run", new_workspace_web_eval_run_path(@workspace.slug), class: "btn btn--primary" %>
+</div>
+
+<div class="card" style="margin-bottom: 20px; padding: 12px 16px;">
+  <%= form_with url: workspace_web_eval_runs_path(@workspace.slug), method: :get, local: true,
+        style: "display: flex; gap: 12px; align-items: center; flex-wrap: wrap;" do %>
+    <select name="prompt_id" class="form-input" style="width: auto; min-width: 160px;">
+      <option value="">All prompts</option>
+      <% @prompts.each do |prompt| %>
+        <option value="<%= prompt.id %>" <%= "selected" if params[:prompt_id].to_s == prompt.id.to_s %>>
+          <%= prompt.slug %>
+        </option>
+      <% end %>
+    </select>
+
+    <select name="dataset_id" class="form-input" style="width: auto; min-width: 160px;">
+      <option value="">All datasets</option>
+      <% @datasets.each do |dataset| %>
+        <option value="<%= dataset.id %>" <%= "selected" if params[:dataset_id].to_s == dataset.id.to_s %>>
+          <%= dataset.name %>
+        </option>
+      <% end %>
+    </select>
+
+    <select name="status" class="form-input" style="width: auto; min-width: 120px;">
+      <option value="">All statuses</option>
+      <% %w[queued running done failed].each do |status| %>
+        <option value="<%= status %>" <%= "selected" if params[:status] == status %>><%= status.capitalize %></option>
+      <% end %>
+    </select>
+
+    <button type="submit" class="btn btn--secondary btn--sm">Filter</button>
+    <% if params[:prompt_id].present? || params[:dataset_id].present? || params[:status].present? %>
+      <%= link_to "Clear", workspace_web_eval_runs_path(@workspace.slug),
+            style: "font-size: 13px; color: var(--t3);" %>
+    <% end %>
+  <% end %>
 </div>
 
 <% if @eval_runs.any? %>
   <div class="card" style="padding: 0; overflow: hidden;">
     <table class="data-table">
       <thead>
-        <tr><th>Prompt</th><th>Dataset</th><th>Version</th><th>Status</th><th>Avg score</th><th>Started</th></tr>
+        <tr>
+          <th>ID</th>
+          <th>Prompt</th>
+          <th>Dataset</th>
+          <th>Scorer</th>
+          <th>Status</th>
+          <th>Score</th>
+          <th>Pass rate</th>
+          <th>Progress</th>
+          <th>Started</th>
+          <th>Duration</th>
+        </tr>
       </thead>
       <tbody>
         <% @eval_runs.each do |run| %>
-          <tr>
-            <td><code style="font-family: var(--font-mono);"><%= run.prompt_version&.prompt&.slug || "—" %></code></td>
-            <td><%= run.dataset&.name %></td>
-            <td style="font-family: var(--font-mono);">v<%= run.prompt_version&.version_number %></td>
-            <td><span class="badge badge--<%= run.status == 'completed' ? 'green' : run.status == 'failed' ? 'red' : 'amber' %>"><%= run.status %></span></td>
-            <td style="font-family: var(--font-mono); font-weight: 600;"><%= run.aggregate_score&.round(2) || "—" %></td>
-            <td style="color: var(--t3); font-size: 12px;"><%= time_ago_in_words(run.created_at) %> ago</td>
+          <tr onclick="Turbo.visit('<%= workspace_web_eval_run_path(@workspace.slug, run) %>')" style="cursor: pointer;">
+            <td style="font-family: var(--font-mono); font-size: 13px;">#<%= run.id %></td>
+            <td>
+              <span style="font-family: var(--font-mono); font-size: 13px;"><%= run.prompt_version.prompt.slug %></span>
+              <span style="font-size: 12px; color: var(--t3);">v<%= run.prompt_version.version_number %></span>
+            </td>
+            <td style="font-size: 13px;"><%= run.dataset.name %></td>
+            <td style="font-size: 13px;"><%= run.scorer.name %></td>
+            <td>
+              <span class="badge badge--<%= status_colors[run.status] %><%= ' badge--pulse' if run.running? %>">
+                <%= run.status %>
+              </span>
+            </td>
+            <td style="font-family: var(--font-mono); font-weight: 600;">
+              <% if run.aggregate_score %>
+                <% bucket = run.aggregate_score >= 0.7 ? "good" : run.aggregate_score >= 0.4 ? "mid" : "bad" %>
+                <span class="score-display score-display--<%= bucket %>"><%= "%.2f" % run.aggregate_score %></span>
+              <% else %>
+                <span style="color: var(--t3);">—</span>
+              <% end %>
+            </td>
+            <td style="font-family: var(--font-mono);">
+              <% if run.pass_rate %><%= "%.0f" % (run.pass_rate * 100) %>%<% else %><span style="color: var(--t3);">—</span><% end %>
+            </td>
+            <td style="font-size: 12px;">
+              <% if run.total_rows.to_i.positive? %>
+                <% pct = (run.scored_rows.to_f / run.total_rows * 100).round %>
+                <div class="progress-bar" style="width: 80px;">
+                  <div class="progress-bar__fill" style="width: <%= pct %>%;"></div>
+                </div>
+                <span style="color: var(--t3); font-family: var(--font-mono);"><%= run.scored_rows %>/<%= run.total_rows %></span>
+              <% end %>
+            </td>
+            <td style="font-size: 12px; color: var(--t3);">
+              <%= run.started_at ? "#{time_ago_in_words(run.started_at)} ago" : "—" %>
+            </td>
+            <td style="font-size: 12px; color: var(--t3); font-family: var(--font-mono);">
+              <% if run.started_at && run.finished_at %>
+                <%= distance_of_time_in_words(run.started_at, run.finished_at) %>
+              <% elsif run.started_at %>
+                <span style="color: var(--amber);">running…</span>
+              <% else %>
+                —
+              <% end %>
+            </td>
           </tr>
         <% end %>
       </tbody>
     </table>
   </div>
 <% else %>
-  <div class="card" style="text-align: center; padding: 48px 20px;">
-    <p style="color: var(--t2); font-size: 14px;">No eval runs yet. Trigger one from the API after uploading a dataset.</p>
+  <div class="card" style="text-align: center; padding: 60px 20px;">
+    <p style="font-size: 15px; color: var(--t2); margin-bottom: 16px;">No eval runs yet.</p>
+    <p style="font-size: 13px; color: var(--t3); margin-bottom: 24px;">Run a prompt version against a dataset with a scorer to measure quality.</p>
+    <%= link_to "Run your first evaluation", new_workspace_web_eval_run_path(@workspace.slug), class: "btn btn--primary" %>
   </div>
 <% end %>

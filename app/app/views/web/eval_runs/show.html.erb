@@ -1,0 +1,206 @@
+<% content_for :page_title, "Eval Run ##{@eval_run.id}" %>
+<% status_colors = { "queued" => "blue", "running" => "amber", "done" => "green", "failed" => "red" } %>
+
+<% if @eval_run.queued? || @eval_run.running? %>
+  <% content_for :head do %>
+    <meta http-equiv="refresh" content="5">
+  <% end %>
+<% end %>
+
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+  <div>
+    <%= link_to "&larr; Eval Runs".html_safe, workspace_web_eval_runs_path(@workspace.slug),
+          style: "font-size: 13px; color: var(--t3); text-decoration: none;" %>
+    <h1 style="margin-top: 8px;">Eval Run #<%= @eval_run.id %></h1>
+    <div style="display: flex; gap: 12px; align-items: center; margin-top: 8px; flex-wrap: wrap;">
+      <span class="badge badge--<%= status_colors[@eval_run.status] %><%= ' badge--pulse' if @eval_run.running? %>">
+        <%= @eval_run.status %>
+      </span>
+      <span style="font-size: 13px; color: var(--t2);">
+        Prompt: <code style="font-family: var(--font-mono);"><%= @eval_run.prompt_version.prompt.slug %></code>
+        <span style="color: var(--t3);">v<%= @eval_run.prompt_version.version_number %></span>
+      </span>
+      <span style="font-size: 13px; color: var(--t2);">Dataset: <strong><%= @eval_run.dataset.name %></strong></span>
+      <span style="font-size: 13px; color: var(--t2);">Scorer: <strong><%= @eval_run.scorer.name %></strong></span>
+    </div>
+  </div>
+</div>
+
+<% if @eval_run.running? && @eval_run.total_rows.to_i.positive? %>
+  <% pct = (@eval_run.scored_rows.to_f / @eval_run.total_rows * 100).round %>
+  <div class="card" style="margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <span style="font-size: 13px; font-weight: 500; color: var(--t2);">Progress</span>
+      <span style="font-size: 13px; font-family: var(--font-mono); color: var(--t2);">
+        <%= @eval_run.scored_rows %> / <%= @eval_run.total_rows %> (<%= pct %>%)
+      </span>
+    </div>
+    <div class="progress-bar progress-bar--lg">
+      <div class="progress-bar__fill progress-bar__fill--animated" style="width: <%= pct %>%;"></div>
+    </div>
+  </div>
+<% end %>
+
+<% if @eval_run.failed? && @eval_run.error_message.present? %>
+  <div class="card" style="margin-bottom: 20px; border-left: 3px solid var(--red); background: var(--red-soft);">
+    <p style="font-size: 13px; font-weight: 500; color: var(--red); margin-bottom: 4px;">Error</p>
+    <p style="font-size: 13px; color: var(--t1); font-family: var(--font-mono);"><%= @eval_run.error_message %></p>
+  </div>
+<% end %>
+
+<div class="stat-grid" style="margin-bottom: 24px;">
+  <div class="stat-card">
+    <div class="stat-card__label">Aggregate score</div>
+    <div class="stat-card__value">
+      <% if @eval_run.aggregate_score %>
+        <% bucket = @eval_run.aggregate_score >= 0.7 ? "good" : @eval_run.aggregate_score >= 0.4 ? "mid" : "bad" %>
+        <span class="score-display score-display--lg score-display--<%= bucket %>"><%= "%.3f" % @eval_run.aggregate_score %></span>
+      <% else %>
+        <span style="color: var(--t3);">—</span>
+      <% end %>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__label">Pass rate</div>
+    <div class="stat-card__value">
+      <% if @eval_run.pass_rate %>
+        <%= "%.1f" % (@eval_run.pass_rate * 100) %>%
+      <% else %>
+        <span style="color: var(--t3);">—</span>
+      <% end %>
+    </div>
+    <div class="stat-card__change">threshold: <%= "%.0f" % (@eval_run.pass_threshold * 100) %>%</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__label">Total rows</div>
+    <div class="stat-card__value"><%= @eval_run.total_rows %></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__label">Scored rows</div>
+    <div class="stat-card__value"><%= @eval_run.scored_rows %></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__label">Avg latency</div>
+    <div class="stat-card__value"><%= @avg_latency ? "#{@avg_latency}ms" : "—" %></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__label">Duration</div>
+    <div class="stat-card__value" style="font-size: 18px;">
+      <% if @eval_run.started_at && @eval_run.finished_at %>
+        <%= distance_of_time_in_words(@eval_run.started_at, @eval_run.finished_at) %>
+      <% elsif @eval_run.started_at %>
+        <span style="color: var(--amber);"><%= distance_of_time_in_words(@eval_run.started_at, Time.current) %></span>
+      <% else %>
+        <span style="color: var(--t3);">—</span>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<% if @results.any? %>
+  <h2 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Results</h2>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 50px;">#</th>
+          <th>Input variables</th>
+          <th>Output</th>
+          <th>Score</th>
+          <th>Pass/Fail</th>
+          <th>Latency</th>
+          <th style="width: 30px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @results.each_with_index do |result, idx| %>
+          <tr class="expandable-row" onclick="this.nextElementSibling.classList.toggle('hidden')" style="cursor: pointer;">
+            <td style="font-family: var(--font-mono); font-size: 12px; color: var(--t3);"><%= idx + 1 %></td>
+            <td style="max-width: 220px;">
+              <div style="font-size: 12px; font-family: var(--font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <% result.dataset_row.input_vars.each do |key, value| %>
+                  <span class="json-viewer__key"><%= key %></span>=<%= truncate(value.to_s, length: 30) %>
+                <% end %>
+              </div>
+            </td>
+            <td style="max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--t2);">
+              <%= truncate(result.output.to_s, length: 80) %>
+              <% if result.error_message.present? %>
+                <span style="color: var(--red); font-size: 12px;">[error]</span>
+              <% end %>
+            </td>
+            <td>
+              <% if result.score %>
+                <% bucket = result.score >= 0.7 ? "good" : result.score >= 0.4 ? "mid" : "bad" %>
+                <span class="score-display score-display--<%= bucket %>"><%= "%.2f" % result.score %></span>
+              <% else %>
+                <span style="color: var(--t3);">—</span>
+              <% end %>
+            </td>
+            <td>
+              <% if result.score %>
+                <% if result.score >= @eval_run.pass_threshold %>
+                  <span class="badge badge--green">Pass</span>
+                <% else %>
+                  <span class="badge badge--red">Fail</span>
+                <% end %>
+              <% end %>
+            </td>
+            <td style="font-size: 12px; font-family: var(--font-mono); color: var(--t3);">
+              <%= result.latency_ms ? "#{result.latency_ms}ms" : "—" %>
+            </td>
+            <td style="font-size: 12px; color: var(--t3);">▾</td>
+          </tr>
+          <tr class="expandable-row__detail hidden">
+            <td colspan="7" style="padding: 16px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div>
+                  <h4 style="font-size: 12px; font-weight: 600; color: var(--t3); text-transform: uppercase; margin-bottom: 8px;">Input variables</h4>
+                  <div class="json-viewer"><pre><%= JSON.pretty_generate(result.dataset_row.input_vars) %></pre></div>
+                </div>
+                <div>
+                  <h4 style="font-size: 12px; font-weight: 600; color: var(--t3); text-transform: uppercase; margin-bottom: 8px;">Full output</h4>
+                  <div style="font-size: 13px; color: var(--t1); white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto; background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 8px;">
+                    <%= result.output %>
+                  </div>
+                </div>
+              </div>
+
+              <% if result.score_rationale.present? %>
+                <div style="margin-top: 12px;">
+                  <h4 style="font-size: 12px; font-weight: 600; color: var(--t3); text-transform: uppercase; margin-bottom: 8px;">Score rationale</h4>
+                  <p style="font-size: 13px; color: var(--t2); line-height: 1.6;"><%= result.score_rationale %></p>
+                </div>
+              <% end %>
+
+              <% if result.error_message.present? %>
+                <div style="margin-top: 12px;">
+                  <h4 style="font-size: 12px; font-weight: 600; color: var(--red); text-transform: uppercase; margin-bottom: 8px;">Error</h4>
+                  <p style="font-size: 13px; color: var(--red); font-family: var(--font-mono);"><%= result.error_message %></p>
+                </div>
+              <% end %>
+
+              <% if result.dataset_row.expected_output.present? %>
+                <div style="margin-top: 12px;">
+                  <h4 style="font-size: 12px; font-weight: 600; color: var(--t3); text-transform: uppercase; margin-bottom: 8px;">Expected output</h4>
+                  <p style="font-size: 13px; color: var(--t2); white-space: pre-wrap;"><%= result.dataset_row.expected_output %></p>
+                </div>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% elsif @eval_run.queued? || @eval_run.running? %>
+  <div class="card" style="text-align: center; padding: 40px 20px;">
+    <p style="font-size: 14px; color: var(--t2);">
+      <% if @eval_run.queued? %>
+        Evaluation is queued. Results will appear here once processing starts.
+      <% else %>
+        Evaluation is running. Results will appear as rows are scored.
+      <% end %>
+    </p>
+    <p style="font-size: 12px; color: var(--t3); margin-top: 8px;">This page auto-refreshes every 5 seconds.</p>
+  </div>
+<% end %>
