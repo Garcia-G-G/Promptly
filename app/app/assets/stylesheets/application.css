@@ -1529,3 +1529,187 @@ select:focus {
   .progress-bar__fill--animated { animation: none !important; }
 }
 
+/* ── Settings tabs ── */
+
+.settings-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--card-border);
+  margin-bottom: 0;
+  flex-wrap: wrap;
+}
+
+.settings-tab {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--t3);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+
+.settings-tab:hover { color: var(--t1); }
+
+.settings-tab--active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Danger zone ── */
+
+.danger-zone {
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  padding: 20px;
+  background: var(--red-soft);
+}
+
+.btn--danger[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Confirm dialog (modal overlay) ── */
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.confirm-modal {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 440px;
+  width: 90%;
+  box-shadow: var(--shadow-md);
+}
+
+.confirm-modal__title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--t1);
+}
+
+.confirm-modal__message {
+  font-size: 14px;
+  color: var(--t2);
+  line-height: 1.5;
+}
+
+/* ── Team members ── */
+
+.member-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.role-badge--accent    { background: var(--accent-light); color: var(--accent); }
+.role-badge--amber     { background: var(--amber-soft);   color: var(--amber); }
+.role-badge--blue      { background: var(--blue-soft);    color: var(--blue); }
+.role-badge--green     { background: var(--green-soft);   color: var(--green); }
+
+/* ── API key display (one-time raw key reveal) ── */
+
+.key-display {
+  background: var(--green-soft);
+  border: 1px solid var(--green);
+}
+
+.key-display__value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  user-select: all;
+  word-break: break-all;
+  flex: 1;
+}
+
+.btn--success-flash {
+  background: var(--green) !important;
+  color: #fff !important;
+  border-color: var(--green) !important;
+}
+
+/* ── Revoked key row ── */
+
+.revoked td { opacity: 0.55; }
+
+.revoked__text {
+  text-decoration: line-through;
+  color: var(--t3);
+}
+
+/* ── Plan card (current subscription banner) ── */
+
+.plan-card {
+  background: var(--accent-light);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+/* ── Usage meter ── */
+
+.usage-meter__track {
+  height: 8px;
+  background: var(--bg);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.usage-meter__fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+  transition: width 0.5s ease;
+}
+
+.usage-meter__fill--warning { background: var(--amber); }
+.usage-meter__fill--danger  { background: var(--red); }
+
+/* ── Plan comparison (pricing table highlight) ── */
+
+.plan-comparison .data-table th:nth-child(3),
+.plan-comparison .data-table td:nth-child(3) {
+  background: var(--accent-light);
+}
+
+.plan-comparison .data-table th:nth-child(3) {
+  color: var(--accent);
+  font-weight: 600;
+}
+

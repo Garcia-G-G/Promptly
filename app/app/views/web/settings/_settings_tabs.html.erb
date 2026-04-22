@@ -1,0 +1,12 @@
+<%# locals: (current_tab:) %>
+<nav class="settings-tabs" aria-label="Settings sections">
+  <% [
+    [ :general,   "General",   workspace_web_settings_path(@workspace.slug) ],
+    [ :team,      "Team",      team_workspace_web_settings_path(@workspace.slug) ],
+    [ :api_keys,  "API Keys",  api_keys_workspace_web_settings_path(@workspace.slug) ],
+    [ :billing,   "Billing",   billing_workspace_web_settings_path(@workspace.slug) ]
+  ].each do |tab, label, path| %>
+    <%= link_to label, path,
+          class: "settings-tab #{'settings-tab--active' if current_tab == tab}" %>
+  <% end %>
+</nav>
