@@ -1,0 +1,91 @@
+<% content_for :page_title, "Team" %>
+
+<%= render "web/settings/settings_tabs", current_tab: :team %>
+
+<% role_colors = { "owner" => "accent", "admin" => "amber", "developer" => "blue", "viewer" => "green" } %>
+
+<div style="margin-top: 24px;">
+  <div class="card" style="margin-bottom: 24px;">
+    <h2 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Invite member</h2>
+    <%= form_with url: invite_member_workspace_web_settings_path(@workspace.slug),
+          method: :post, local: true,
+          style: "display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;" do %>
+      <div class="form-group" style="flex: 1; min-width: 240px; margin-bottom: 0;">
+        <label class="form-label" for="invite_email">Email address</label>
+        <input type="email" name="email" id="invite_email"
+               class="form-input" placeholder="teammate@company.com" required>
+      </div>
+      <div class="form-group" style="width: 160px; margin-bottom: 0;">
+        <label class="form-label" for="invite_role">Role</label>
+        <select name="role" id="invite_role" class="form-input">
+          <option value="developer">Developer</option>
+          <option value="admin">Admin</option>
+          <option value="viewer">Viewer</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn--primary">Send invite</button>
+    <% end %>
+    <p class="form-hint" style="margin-top: 10px;">The user must already have a Promptly account — an invite email is sent once they're added.</p>
+  </div>
+
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Member</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th style="width: 220px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @memberships.each do |membership| %>
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="member-avatar"><%= membership.user.name.to_s.first&.upcase || "?" %></div>
+                <span style="font-weight: 500;"><%= membership.user.name %></span>
+              </div>
+            </td>
+            <td style="color: var(--t2); font-size: 13px;"><%= membership.user.email %></td>
+            <td>
+              <span class="role-badge role-badge--<%= role_colors[membership.role] %>">
+                <%= membership.role.titleize %>
+              </span>
+            </td>
+            <td style="color: var(--t3); font-size: 12px;"><%= membership.created_at.strftime("%b %d, %Y") %></td>
+            <td>
+              <% if membership.owner? %>
+                <span style="font-size: 12px; color: var(--t3);">—</span>
+              <% else %>
+                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                  <%= form_with url: update_member_role_workspace_web_settings_path(@workspace.slug, membership.id),
+                        method: :patch, local: true,
+                        style: "display: flex; gap: 6px; align-items: center;" do %>
+                    <select name="role" class="form-input" style="padding: 4px 8px; font-size: 12px; width: auto;">
+                      <% %w[admin developer viewer].each do |role| %>
+                        <option value="<%= role %>" <%= "selected" if membership.role == role %>>
+                          <%= role.titleize %>
+                        </option>
+                      <% end %>
+                    </select>
+                    <button type="submit" class="btn btn--secondary btn--sm">Update</button>
+                  <% end %>
+
+                  <% unless membership.user_id == current_user.id %>
+                    <%= button_to "Remove",
+                          remove_member_workspace_web_settings_path(@workspace.slug, membership.id),
+                          method: :delete,
+                          class: "btn btn--danger btn--sm",
+                          form: { data: { turbo_confirm: "Remove #{membership.user.name || membership.user.email} from this workspace?" } } %>
+                  <% end %>
+                </div>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,9 @@
+Hi <%= @user.name.presence || @user.email %>,
+
+You've been added to the "<%= @workspace.name %>" workspace on Promptly as a <%= @membership.role %>.
+
+Log in at: <%= @login_url %>
+
+If you didn't expect this invitation, you can safely ignore this email.
+
+-- Promptly: Prompt management for production teams.
