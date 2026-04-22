@@ -41,7 +41,8 @@ module Web
     test "settings show renders" do
       get workspace_web_settings_path(@workspace.slug)
       assert_response :success
-      assert_select "h1", "Settings"
+      assert_select ".settings-tabs"
+      assert_select "h2", /Workspace settings/i
     end
   end
 end
