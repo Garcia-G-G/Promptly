@@ -1,5 +1,5 @@
 class RunEvalJob < ApplicationJob
-  queue_as :default
+  queue_as :evaluations
 
   retry_on Anthropic::Errors::APIError, wait: :polynomially_longer, attempts: 3
   discard_on ActiveRecord::RecordNotFound
@@ -13,11 +13,12 @@ class RunEvalJob < ApplicationJob
     prompt_content = eval_run.prompt_version.content
     scorer = eval_run.scorer
 
-    # Skip rows already processed (idempotent on retry)
-    processed_row_ids = eval_run.eval_run_results.pluck(:dataset_row_id).to_set
+    # Exclude already-processed rows via subquery so retries don't load
+    # the full row-id set into Ruby memory for large datasets.
+    completed_row_ids = EvalRunResult.where(eval_run_id: eval_run.id).select(:dataset_row_id)
+    pending_rows = eval_run.dataset.dataset_rows.where.not(id: completed_row_ids)
 
-    eval_run.dataset.dataset_rows.find_each do |row|
-      next if processed_row_ids.include?(row.id)
+    pending_rows.find_each(batch_size: 100) do |row|
       process_row(eval_run, row, prompt_content, scorer)
     end
 

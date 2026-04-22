@@ -8,6 +8,9 @@ class ScoreOutputJob < ApplicationJob
     log = Log.find(log_id)
     scorer = Scorer.find(scorer_id)
 
+    # Idempotency: a previous attempt of this job may have scored the log
+    # and crashed before updating the ExperimentResult. Re-running then
+    # would double-score. Early return is safe because scores are final.
     return if log.score.present?
 
     if scorer.type_llm_judge? && ENV["ANTHROPIC_API_KEY"].blank?
@@ -22,10 +25,14 @@ class ScoreOutputJob < ApplicationJob
       output: log.output
     )
 
-    log.update_columns(score: score, score_rationale: rationale, scorer_id: scorer.id)
+    # Wrap the two writes in a transaction so we never end up with a
+    # scored Log but an unscored ExperimentResult.
+    ActiveRecord::Base.transaction do
+      log.update!(score: score, score_rationale: rationale, scorer_id: scorer.id)
 
-    if log.experiment_id.present?
-      ExperimentResult.where(log_id: log.id).update_all(score: score)
+      if log.experiment_id.present?
+        ExperimentResult.where(log_id: log.id).update_all(score: score)
+      end
     end
   end
 end
