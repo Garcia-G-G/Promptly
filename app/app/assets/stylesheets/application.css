@@ -1637,3 +1637,38 @@ select:focus {
 .role-badge--blue      { background: var(--blue-soft);    color: var(--blue); }
 .role-badge--green     { background: var(--green-soft);   color: var(--green); }
 
+/* ── API key display (one-time raw key reveal) ── */
+
+.key-display {
+  background: var(--green-soft);
+  border: 1px solid var(--green);
+}
+
+.key-display__value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  user-select: all;
+  word-break: break-all;
+  flex: 1;
+}
+
+.btn--success-flash {
+  background: var(--green) !important;
+  color: #fff !important;
+  border-color: var(--green) !important;
+}
+
+/* ── Revoked key row ── */
+
+.revoked td { opacity: 0.55; }
+
+.revoked__text {
+  text-decoration: line-through;
+  color: var(--t3);
+}
+
