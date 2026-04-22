@@ -13,7 +13,8 @@ class TurboFailureApp < Devise::FailureApp
     if turbo_request?
       self.status = 422
       self.content_type = "text/html"
-      self.response.headers["Turbo-Frame"] = env["HTTP_TURBO_FRAME"] if env["HTTP_TURBO_FRAME"]
+      turbo_frame = request.headers["Turbo-Frame"]
+      self.response.headers["Turbo-Frame"] = turbo_frame if turbo_frame
       super
     else
       super
@@ -26,6 +27,6 @@ class TurboFailureApp < Devise::FailureApp
     return false unless request.format.html? || request.format.turbo_stream?
     return true if request.headers["Accept"].to_s.include?("turbo-stream")
 
-    env["HTTP_TURBO_FRAME"].present? || request.xhr?
+    request.headers["Turbo-Frame"].present? || request.xhr?
   end
 end
