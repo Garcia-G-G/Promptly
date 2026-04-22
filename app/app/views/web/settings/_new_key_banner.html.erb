@@ -1,0 +1,16 @@
+<%# locals: (raw_key:) %>
+<div class="card key-display" style="margin-bottom: 24px;" data-controller="clipboard">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+    <span class="badge badge--green">New key created</span>
+  </div>
+  <p style="font-size: 13px; color: var(--t2); margin-bottom: 12px;">
+    Copy this key now. You will not be able to see it again.
+  </p>
+  <div style="display: flex; gap: 8px; align-items: center;">
+    <code class="key-display__value" data-clipboard-target="source"><%= raw_key %></code>
+    <button type="button"
+            class="btn btn--secondary btn--sm"
+            data-clipboard-target="button"
+            data-action="click->clipboard#copy">Copy</button>
+  </div>
+</div>

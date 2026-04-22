@@ -1,0 +1,7 @@
+<%= turbo_stream.update "new-key-banner" do %>
+  <%= render "new_key_banner", raw_key: @api_key.raw_key %>
+<% end %>
+
+<%= turbo_stream.prepend "api-keys-table-body" do %>
+  <%= render "api_key_row", api_key: @api_key %>
+<% end %>

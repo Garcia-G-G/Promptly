@@ -1,0 +1,52 @@
+<% content_for :page_title, "API Keys" %>
+
+<%= render "web/settings/settings_tabs", current_tab: :api_keys %>
+
+<div style="margin-top: 24px;">
+  <div class="card" style="margin-bottom: 24px;">
+    <h2 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Create API key</h2>
+    <%= form_with url: create_api_key_workspace_web_settings_path(@workspace.slug),
+          method: :post, local: true,
+          style: "display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;" do %>
+      <div class="form-group" style="flex: 1; min-width: 240px; margin-bottom: 0;">
+        <label class="form-label" for="api_key_name">Key name</label>
+        <input type="text" name="name" id="api_key_name" class="form-input"
+               placeholder="Production server" required maxlength="255">
+        <p class="form-hint">Pick a name that identifies where this key is used.</p>
+      </div>
+      <button type="submit" class="btn btn--primary">Create key</button>
+    <% end %>
+  </div>
+
+  <div id="new-key-banner">
+    <% if @new_raw_key.present? %>
+      <%= render "new_key_banner", raw_key: @new_raw_key %>
+    <% end %>
+  </div>
+
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Key</th>
+          <th>Created</th>
+          <th>Last used</th>
+          <th>Status</th>
+          <th style="width: 110px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="api-keys-table-body">
+        <% if @api_keys.any? %>
+          <%= render partial: "api_key_row", collection: @api_keys, as: :api_key %>
+        <% else %>
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 40px 20px; color: var(--t3);">
+              No API keys yet. Create one above to get started.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
