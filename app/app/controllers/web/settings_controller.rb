@@ -6,6 +6,13 @@ module Web
       "WHEN 'developer' THEN 2 " \
       "WHEN 'viewer' THEN 3 END".freeze
 
+    ADMIN_ACTIONS = %i[
+      update create_api_key revoke_api_key
+      invite_member update_role remove_member
+    ].freeze
+
+    before_action :require_admin_or_owner!, only: ADMIN_ACTIONS
+
     def show
       # General settings page — @workspace set by Web::BaseController.
     end
@@ -142,6 +149,14 @@ module Web
     end
 
     private
+
+    def require_admin_or_owner!
+      membership = @workspace.memberships.find_by(user: current_user)
+      return if membership && %w[owner admin].include?(membership.role)
+
+      redirect_to workspace_web_settings_path(@workspace.slug),
+        alert: "You don't have permission to perform this action."
+    end
 
     def workspace_params
       params.require(:workspace).permit(:name)
