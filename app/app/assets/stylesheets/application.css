@@ -1337,3 +1337,195 @@ select:focus {
   outline: none;
 }
 
+/* ── Hidden utility ── */
+
+.hidden { display: none !important; }
+
+/* ── Tag badge ── */
+
+.tag-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  background: var(--card-hover);
+  color: var(--t2);
+  border-radius: 20px;
+  border: 1px solid var(--card-border);
+  margin-right: 4px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+
+/* ── JSON viewer ── */
+
+.json-viewer {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--t1);
+}
+
+.json-viewer pre {
+  background: var(--bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  overflow-x: auto;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.json-viewer__key { color: var(--blue); font-weight: 500; }
+.json-viewer__value { color: var(--t2); }
+
+/* ── Expandable row (clickable → expanded detail) ── */
+
+.expandable-row { transition: background 0.1s; }
+.expandable-row:hover { background: var(--card-hover); }
+.expandable-row__detail > td {
+  border-top: 1px dashed var(--card-border);
+  background: var(--bg);
+}
+
+/* ── Danger button ── */
+
+.btn--danger {
+  background: var(--red-soft);
+  color: var(--red);
+  border: 1px solid var(--red);
+}
+
+.btn--danger:hover {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+}
+
+/* ── Type badge (scorer types, etc.) ── */
+
+.type-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.type-badge--blue  { background: var(--blue-soft);  color: var(--blue); }
+.type-badge--green { background: var(--green-soft); color: var(--green); }
+.type-badge--amber { background: var(--amber-soft); color: var(--amber); }
+.type-badge--muted { background: var(--card-hover); color: var(--t3); }
+
+/* ── Type selector (radio card) ── */
+
+.type-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.type-selector-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.type-selector-option:hover { border-color: var(--accent); }
+
+.type-selector-option:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.type-selector-option input[type="radio"] { margin-bottom: 6px; }
+
+.type-selector-option__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--t1);
+}
+
+.type-selector-option__desc {
+  font-size: 11px;
+  color: var(--t3);
+  margin-top: 2px;
+}
+
+@media (max-width: 768px) {
+  .type-selector { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Progress bar ── */
+
+.progress-bar {
+  height: 6px;
+  background: var(--card-border);
+  border-radius: 3px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.progress-bar--lg {
+  height: 10px;
+  width: 100%;
+  border-radius: 5px;
+  display: block;
+}
+
+.progress-bar__fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+  transition: width 0.4s ease;
+}
+
+.progress-bar__fill--animated {
+  background: linear-gradient(90deg, var(--accent) 0%, #f59e0b 50%, var(--accent) 100%);
+  background-size: 200% 100%;
+  animation: progress-shimmer 1.5s linear infinite;
+}
+
+@keyframes progress-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Score display ── */
+
+.score-display {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.score-display--lg   { font-size: 28px; }
+.score-display--good { color: var(--green); }
+.score-display--mid  { color: var(--amber); }
+.score-display--bad  { color: var(--red); }
+
+/* ── Badge pulse (running status) ── */
+
+.badge--pulse { animation: badge-pulse 1.5s ease-in-out infinite; }
+
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge--pulse,
+  .progress-bar__fill--animated { animation: none !important; }
+}
+

@@ -1,0 +1,88 @@
+<% content_for :page_title, "New eval run" %>
+
+<div class="page-header">
+  <%= link_to "&larr; Eval Runs".html_safe, workspace_web_eval_runs_path(@workspace.slug),
+        style: "font-size: 13px; color: var(--t3); text-decoration: none;" %>
+  <h1 style="margin-top: 8px;">New eval run</h1>
+  <p style="color: var(--t2); font-size: 14px; margin-top: 4px;">Evaluate a prompt version against a dataset using a scorer.</p>
+</div>
+
+<div class="card" style="max-width: 680px;">
+  <%= form_with url: workspace_web_eval_runs_path(@workspace.slug), method: :post,
+        local: true, class: "form" do %>
+    <div class="form-group">
+      <label class="form-label" for="eval_run_prompt_version_id">Prompt version</label>
+      <select name="eval_run[prompt_version_id]" id="eval_run_prompt_version_id" class="form-input" required>
+        <option value="">Select a prompt version…</option>
+        <% @prompts.each do |prompt| %>
+          <optgroup label="<%= prompt.slug %>">
+            <% prompt.prompt_versions.order(version_number: :desc).each do |v| %>
+              <option value="<%= v.id %>">
+                v<%= v.version_number %> — <%= v.environment %> — <%= v.model_hint %>
+              </option>
+            <% end %>
+          </optgroup>
+        <% end %>
+      </select>
+      <p class="form-hint">Choose which prompt version to evaluate.</p>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="eval_run_dataset_id">Dataset</label>
+      <select name="eval_run[dataset_id]" id="eval_run_dataset_id" class="form-input" required>
+        <option value="">Select a dataset…</option>
+        <% @datasets.each do |dataset| %>
+          <option value="<%= dataset.id %>"><%= dataset.name %> (<%= dataset.dataset_rows.count %> rows)</option>
+        <% end %>
+      </select>
+      <p class="form-hint">Test cases to run the prompt against.</p>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="eval_run_scorer_id">Scorer</label>
+      <select name="eval_run[scorer_id]" id="eval_run_scorer_id" class="form-input" required>
+        <option value="">Select a scorer…</option>
+        <% @scorers.each do |scorer| %>
+          <option value="<%= scorer.id %>"><%= scorer.name %> (<%= scorer.scorer_type.humanize %>)</option>
+        <% end %>
+      </select>
+      <p class="form-hint">How to score the outputs. Only active scorers are listed.</p>
+    </div>
+
+    <div class="form-group" data-controller="pass-threshold">
+      <label class="form-label">
+        Pass threshold:
+        <span data-pass-threshold-target="display"
+              style="font-family: var(--font-mono); font-weight: 600; color: var(--accent);">60%</span>
+      </label>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 12px; color: var(--t3);">0%</span>
+        <input type="range" name="eval_run[pass_threshold]"
+               min="0" max="1" step="0.05" value="0.6"
+               class="form-range"
+               data-action="input->pass-threshold#update"
+               data-pass-threshold-target="slider">
+        <span style="font-size: 12px; color: var(--t3);">100%</span>
+      </div>
+      <p class="form-hint">Rows with scores at or above this threshold are considered passing.</p>
+    </div>
+
+    <div style="display: flex; gap: 8px; margin-top: 24px;">
+      <button type="submit" class="btn btn--primary">Run evaluation</button>
+      <%= link_to "Cancel", workspace_web_eval_runs_path(@workspace.slug), class: "btn btn--secondary" %>
+    </div>
+  <% end %>
+</div>
+
+<% if @prompts.empty? || @datasets.empty? || @scorers.empty? %>
+  <div class="card" style="margin-top: 20px; border-left: 3px solid var(--amber); background: var(--amber-soft);">
+    <% missing = [] %>
+    <% missing << "prompts with versions" if @prompts.empty? %>
+    <% missing << "datasets" if @datasets.empty? %>
+    <% missing << "active scorers" if @scorers.empty? %>
+    <p style="font-size: 13px; color: var(--t1);">
+      <strong>Missing prerequisites:</strong>
+      You need <%= missing.join(", ") %> before you can run an evaluation.
+    </p>
+  </div>
+<% end %>

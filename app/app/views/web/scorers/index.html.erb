@@ -1,30 +1,72 @@
 <% content_for :page_title, "Scorers" %>
 
-<div class="page-header">
-  <h1>Scorers</h1>
-  <p><%= pluralize(@scorers.size, "scorer") %></p>
+<% type_colors = { "llm_judge" => "blue", "exact_match" => "green", "regex" => "amber", "custom" => nil } %>
+
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+  <div>
+    <h1>Scorers</h1>
+    <p style="color: var(--t2); font-size: 14px; margin-top: 4px;">Define how prompt outputs are scored during evaluations.</p>
+  </div>
+  <%= link_to "New scorer", new_workspace_web_scorer_path(@workspace.slug), class: "btn btn--primary" %>
 </div>
 
 <% if @scorers.any? %>
   <div class="card" style="padding: 0; overflow: hidden;">
     <table class="data-table">
       <thead>
-        <tr><th>Name</th><th>Type</th><th>Project</th><th>Created</th></tr>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Project</th>
+          <th>Status</th>
+          <th>Version</th>
+          <th style="width: 200px;">Actions</th>
+        </tr>
       </thead>
       <tbody>
-        <% @scorers.each do |sc| %>
+        <% @scorers.each do |scorer| %>
           <tr>
-            <td style="font-weight: 500;"><%= sc.name %></td>
-            <td><span class="badge badge--blue"><%= sc.scorer_type %></span></td>
-            <td><%= sc.project.name %></td>
-            <td style="color: var(--t3); font-size: 12px;"><%= time_ago_in_words(sc.created_at) %> ago</td>
+            <td style="font-weight: 500;"><%= scorer.name %></td>
+            <td>
+              <% color = type_colors[scorer.scorer_type] %>
+              <% if color %>
+                <span class="type-badge type-badge--<%= color %>"><%= scorer.scorer_type.humanize %></span>
+              <% else %>
+                <span class="type-badge type-badge--muted"><%= scorer.scorer_type.humanize %></span>
+              <% end %>
+            </td>
+            <td style="font-size: 13px; color: var(--t3); font-family: var(--font-mono);"><%= scorer.project.name %></td>
+            <td>
+              <% if scorer.active? %>
+                <span class="badge badge--green">Active</span>
+              <% else %>
+                <span class="badge" style="background: var(--card-hover); color: var(--t3);">Inactive</span>
+              <% end %>
+            </td>
+            <td style="font-family: var(--font-mono); font-size: 13px;">v<%= scorer.version_number %></td>
+            <td>
+              <div style="display: flex; gap: 4px;">
+                <%= link_to "Edit", edit_workspace_web_scorer_path(@workspace.slug, scorer),
+                      class: "btn btn--secondary btn--sm" %>
+                <%= button_to scorer.active? ? "Deactivate" : "Activate",
+                      workspace_web_scorer_path(@workspace.slug, scorer),
+                      method: :patch,
+                      params: { scorer: { active: !scorer.active? } },
+                      class: "btn btn--secondary btn--sm",
+                      data: (scorer.active? ? { turbo_confirm: "Deactivate scorer '#{scorer.name}'?" } : {}) %>
+              </div>
+            </td>
           </tr>
         <% end %>
       </tbody>
     </table>
   </div>
 <% else %>
-  <div class="card" style="text-align: center; padding: 48px 20px;">
-    <p style="color: var(--t2); font-size: 14px;">No scorers yet. Create one via the API to attach automated scoring to your prompts.</p>
+  <div class="card" style="text-align: center; padding: 60px 20px;">
+    <p style="font-size: 15px; color: var(--t2); margin-bottom: 16px;">No scorers configured yet.</p>
+    <p style="font-size: 13px; color: var(--t3); margin-bottom: 24px;">
+      Scorers define how prompt outputs are evaluated — LLM judge, exact match, regex, or custom logic.
+    </p>
+    <%= link_to "Create your first scorer", new_workspace_web_scorer_path(@workspace.slug), class: "btn btn--primary" %>
   </div>
 <% end %>

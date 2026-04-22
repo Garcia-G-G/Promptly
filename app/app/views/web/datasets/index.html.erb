@@ -1,30 +1,40 @@
 <% content_for :page_title, "Datasets" %>
 
-<div class="page-header">
-  <h1>Datasets</h1>
-  <p><%= pluralize(@datasets.size, "dataset") %></p>
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+  <div>
+    <h1>Datasets</h1>
+    <p style="color: var(--t2); font-size: 14px; margin-top: 4px;">Test case collections for evaluating prompt versions.</p>
+  </div>
+  <%= link_to "New dataset", new_workspace_web_dataset_path(@workspace.slug), class: "btn btn--primary" %>
 </div>
 
 <% if @datasets.any? %>
-  <div class="card" style="padding: 0; overflow: hidden;">
-    <table class="data-table">
-      <thead>
-        <tr><th>Name</th><th>Project</th><th>Rows</th><th>Created</th></tr>
-      </thead>
-      <tbody>
-        <% @datasets.each do |ds| %>
-          <tr>
-            <td style="font-weight: 500;"><%= ds.name %></td>
-            <td><%= ds.project.name %></td>
-            <td style="font-family: var(--font-mono);"><%= ds.dataset_rows.size %></td>
-            <td style="color: var(--t3); font-size: 12px;"><%= time_ago_in_words(ds.created_at) %> ago</td>
-          </tr>
+  <div class="prompt-grid">
+    <% @datasets.each do |dataset| %>
+      <%= link_to workspace_web_dataset_path(@workspace.slug, dataset),
+            class: "prompt-card card",
+            style: "text-decoration: none; color: inherit;",
+            data: { controller: "tilt", action: "mousemove->tilt#mousemove mouseleave->tilt#mouseleave" } do %>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+          <div>
+            <h3 style="font-size: 15px; font-weight: 600; color: var(--t1); margin-bottom: 4px;"><%= dataset.name %></h3>
+            <p style="font-size: 13px; color: var(--t3); font-family: var(--font-mono);"><%= dataset.project.name %></p>
+          </div>
+          <span class="badge badge--blue"><%= dataset.dataset_rows.size %> rows</span>
+        </div>
+        <% if dataset.description.present? %>
+          <p style="font-size: 13px; color: var(--t2); margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            <%= dataset.description %>
+          </p>
         <% end %>
-      </tbody>
-    </table>
+        <div style="font-size: 12px; color: var(--t3);">Updated <%= time_ago_in_words(dataset.updated_at) %> ago</div>
+      <% end %>
+    <% end %>
   </div>
 <% else %>
-  <div class="card" style="text-align: center; padding: 48px 20px;">
-    <p style="color: var(--t2); font-size: 14px;">No datasets yet. Upload one via the API to run evals.</p>
+  <div class="card" style="text-align: center; padding: 60px 20px;">
+    <p style="font-size: 15px; color: var(--t2); margin-bottom: 16px;">No datasets yet.</p>
+    <p style="font-size: 13px; color: var(--t3); margin-bottom: 24px;">Create a dataset with test cases to evaluate your prompt versions.</p>
+    <%= link_to "Create your first dataset", new_workspace_web_dataset_path(@workspace.slug), class: "btn btn--primary" %>
   </div>
 <% end %>

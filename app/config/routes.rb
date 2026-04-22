@@ -25,9 +25,11 @@ Rails.application.routes.draw do
         end
       end
       resources :logs, only: [ :index, :show ]
-      resources :datasets, only: [ :index ]
-      resources :scorers, only: [ :index ]
-      resources :eval_runs, only: [ :index ]
+      resources :datasets, only: [ :index, :show, :new, :create, :destroy ] do
+        post :import, on: :member
+      end
+      resources :scorers, only: [ :index, :new, :create, :edit, :update, :destroy ]
+      resources :eval_runs, only: [ :index, :show, :new, :create ]
       resource :settings, only: [ :show ]
     end
   end

@@ -1,0 +1,53 @@
+<% content_for :page_title, "Edit #{@scorer.name}" %>
+<% type_colors = { "llm_judge" => "blue", "exact_match" => "green", "regex" => "amber", "custom" => "muted" } %>
+
+<div class="page-header">
+  <%= link_to "&larr; Scorers".html_safe, workspace_web_scorers_path(@workspace.slug),
+        style: "font-size: 13px; color: var(--t3); text-decoration: none;" %>
+  <h1 style="margin-top: 8px;">Edit scorer</h1>
+  <p style="font-size: 13px; color: var(--t3); margin-top: 4px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+    <strong style="color: var(--t2);"><%= @scorer.name %></strong>
+    <span>·</span>
+    <span style="font-family: var(--font-mono);">v<%= @scorer.version_number %></span>
+    <span>·</span>
+    <span class="type-badge type-badge--<%= type_colors[@scorer.scorer_type] %>"><%= @scorer.scorer_type.humanize %></span>
+  </p>
+</div>
+
+<div class="card" style="max-width: 680px;">
+  <%= form_with model: @scorer, url: workspace_web_scorer_path(@workspace.slug, @scorer),
+        method: :patch, local: true, class: "form", data: { controller: "scorer-form" } do |f| %>
+    <div class="form-group">
+      <%= f.label :name, class: "form-label" %>
+      <%= f.text_field :name, class: "form-input", required: true %>
+    </div>
+
+    <%= render "form_fields", scorer: @scorer %>
+
+    <div class="form-group">
+      <label class="form-label" style="display: flex; align-items: center; gap: 8px;">
+        <input type="hidden" name="scorer[active]" value="0">
+        <input type="checkbox" name="scorer[active]" value="1" <%= "checked" if @scorer.active? %>
+               style="width: auto;">
+        Active
+      </label>
+      <p class="form-hint">Inactive scorers won't be used in new eval runs.</p>
+    </div>
+
+    <p style="font-size: 12px; color: var(--t3); margin-top: 16px;">
+      Saving a changed template or type will increment the version to
+      <strong>v<%= @scorer.version_number + 1 %></strong>.
+    </p>
+
+    <div style="display: flex; gap: 8px; margin-top: 16px;">
+      <button type="submit" class="btn btn--primary">Update scorer</button>
+      <%= link_to "Cancel", workspace_web_scorers_path(@workspace.slug), class: "btn btn--secondary" %>
+      <%= button_to "Delete",
+            workspace_web_scorer_path(@workspace.slug, @scorer),
+            method: :delete,
+            class: "btn btn--danger btn--sm",
+            style: "margin-left: auto;",
+            data: { turbo_confirm: "Delete scorer '#{@scorer.name}'? This cannot be undone." } %>
+    </div>
+  <% end %>
+</div>
