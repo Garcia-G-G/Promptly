@@ -9,7 +9,7 @@ module Web
     def index
       @datasets = Dataset.joins(:project)
         .where(projects: { workspace_id: @workspace.id })
-        .includes(:project, :dataset_rows)
+        .includes(:project)
         .order(updated_at: :desc)
     end
 

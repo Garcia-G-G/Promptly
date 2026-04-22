@@ -2,7 +2,7 @@ class DatasetRow < ApplicationRecord
   INPUT_VARS_MAX_BYTES = 100_000
   TAGS_MAX_BYTES = 10_000
 
-  belongs_to :dataset
+  belongs_to :dataset, counter_cache: true
 
   validates :input_vars, presence: true
   validate :input_vars_valid_format

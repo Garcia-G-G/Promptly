@@ -25,12 +25,21 @@ module Web
       @stats = Experiments::Stats.call(experiment: @experiment)
       @significance = Experiments::BayesianSignificance.call(experiment: @experiment)
 
-      results = @experiment.experiment_results
-      @recent_results = results.includes(:log).order(created_at: :desc).limit(50)
-      @variant_a_avg = results.where(variant: "a").where.not(score: nil).average(:score)&.round(3)
-      @variant_b_avg = results.where(variant: "b").where.not(score: nil).average(:score)&.round(3)
-      @variant_a_count = results.where(variant: "a").count
-      @variant_b_count = results.where(variant: "b").count
+      # One grouped aggregate query instead of four per-variant selects.
+      stats = @experiment.experiment_results
+        .group(:variant)
+        .pluck(Arel.sql("variant, COUNT(*), AVG(score)"))
+        .to_h { |variant, total, avg| [ variant, { count: total.to_i, avg: avg&.to_f&.round(3) } ] }
+
+      @variant_a_count = stats.dig("a", :count) || 0
+      @variant_b_count = stats.dig("b", :count) || 0
+      @variant_a_avg   = stats.dig("a", :avg)
+      @variant_b_avg   = stats.dig("b", :avg)
+
+      @recent_results = @experiment.experiment_results
+        .includes(:log)
+        .order(created_at: :desc)
+        .limit(50)
     end
 
     def new

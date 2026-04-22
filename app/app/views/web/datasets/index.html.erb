@@ -20,7 +20,7 @@
             <h3 style="font-size: 15px; font-weight: 600; color: var(--t1); margin-bottom: 4px;"><%= dataset.name %></h3>
             <p style="font-size: 13px; color: var(--t3); font-family: var(--font-mono);"><%= dataset.project.name %></p>
           </div>
-          <span class="badge badge--blue"><%= dataset.dataset_rows.size %> rows</span>
+          <span class="badge badge--blue"><%= dataset.dataset_rows_count %> rows</span>
         </div>
         <% if dataset.description.present? %>
           <p style="font-size: 13px; color: var(--t2); margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">

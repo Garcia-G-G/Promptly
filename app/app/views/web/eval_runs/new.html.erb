@@ -32,7 +32,7 @@
       <select name="eval_run[dataset_id]" id="eval_run_dataset_id" class="form-input" required>
         <option value="">Select a dataset…</option>
         <% @datasets.each do |dataset| %>
-          <option value="<%= dataset.id %>"><%= dataset.name %> (<%= dataset.dataset_rows.count %> rows)</option>
+          <option value="<%= dataset.id %>"><%= dataset.name %> (<%= dataset.dataset_rows_count %> rows)</option>
         <% end %>
       </select>
       <p class="form-hint">Test cases to run the prompt against.</p>
