@@ -28,6 +28,21 @@
 <body>
   <a href="#main-content" class="skip-link">Skip to content</a>
   <canvas data-controller="canvas-grid" aria-hidden="true" style="position:fixed;inset:0;z-index:0;pointer-events:none"></canvas>
+  <% if flash[:alert].present? || flash[:notice].present? %>
+    <div class="landing-flash" role="status" aria-live="polite"
+         style="position: relative; z-index: 10; max-width: 420px; margin: 80px auto 0;">
+      <% if flash[:alert].present? %>
+        <div class="auth-errors" style="background: var(--red-soft); border: 1px solid var(--red); color: var(--red); padding: 10px 14px; border-radius: 8px; font-size: 13px;">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+      <% if flash[:notice].present? %>
+        <div class="auth-notice" style="background: var(--green-soft); border: 1px solid var(--green); color: var(--green); padding: 10px 14px; border-radius: 8px; font-size: 13px;">
+          <%= flash[:notice] %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
   <%= yield %>
 </body>
 </html>
