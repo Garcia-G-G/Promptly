@@ -1,0 +1,36 @@
+<% content_for :page_title, "New scorer" %>
+
+<div class="page-header">
+  <%= link_to "&larr; Scorers".html_safe, workspace_web_scorers_path(@workspace.slug),
+        style: "font-size: 13px; color: var(--t3); text-decoration: none;" %>
+  <h1 style="margin-top: 8px;">New scorer</h1>
+</div>
+
+<div class="card" style="max-width: 680px;">
+  <%= form_with url: workspace_web_scorers_path(@workspace.slug), method: :post,
+        local: true, class: "form", data: { controller: "scorer-form" } do %>
+    <div class="form-group">
+      <label class="form-label" for="scorer_project_id">Project</label>
+      <select name="scorer[project_id]" id="scorer_project_id" class="form-input" required>
+        <option value="">Select a project…</option>
+        <% @projects.each do |project| %>
+          <option value="<%= project.id %>"><%= project.name %></option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="scorer_name">Name</label>
+      <input type="text" name="scorer[name]" id="scorer_name" value="<%= @scorer.name %>"
+             placeholder="quality-judge" class="form-input" required>
+      <p class="form-hint">Unique name within the project.</p>
+    </div>
+
+    <%= render "form_fields", scorer: @scorer %>
+
+    <div style="display: flex; gap: 8px; margin-top: 24px;">
+      <button type="submit" class="btn btn--primary">Create scorer</button>
+      <%= link_to "Cancel", workspace_web_scorers_path(@workspace.slug), class: "btn btn--secondary" %>
+    </div>
+  <% end %>
+</div>

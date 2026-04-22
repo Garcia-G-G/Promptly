@@ -1,0 +1,66 @@
+<%
+  types = [
+    [ "llm_judge",   "LLM Judge",   "AI-powered scoring" ],
+    [ "exact_match", "Exact Match", "Compare to expected" ],
+    [ "regex",       "Regex",       "Pattern matching" ],
+    [ "custom",      "Custom",      "Custom logic description" ]
+  ]
+  default_judge_template = "You are an output quality evaluator.\n\nScore the following LLM output on a scale of 0.0 to 1.0.\nConsider: accuracy, relevance, helpfulness, and tone.\n\nPrompt used: {prompt_content}\nVariables: {input_vars}\nOutput received: {output}\nExpected output: {expected_output}\n\nReturn ONLY JSON: {\"score\": 0.0, \"rationale\": \"...\"}"
+%>
+
+<div class="form-group">
+  <label class="form-label">Scorer type</label>
+  <div class="type-selector" data-scorer-form-target="typeSelector">
+    <% types.each do |value, label, desc| %>
+      <label class="type-selector-option">
+        <input type="radio" name="scorer[scorer_type]" value="<%= value %>"
+               <%= "checked" if scorer.scorer_type == value %>
+               data-action="change->scorer-form#typeChanged">
+        <span class="type-selector-option__label"><%= label %></span>
+        <span class="type-selector-option__desc"><%= desc %></span>
+      </label>
+    <% end %>
+  </div>
+</div>
+
+<div class="form-group" data-scorer-form-target="contentGroup"
+     <%= "hidden" if scorer.scorer_type == "exact_match" %>>
+  <label class="form-label" data-scorer-form-target="contentLabel">
+    <%= case scorer.scorer_type
+        when "llm_judge" then "Judge prompt template"
+        when "regex"     then "Regex pattern"
+        else                  "Content"
+        end %>
+  </label>
+
+  <div data-scorer-form-target="llmContent" <%= "hidden" unless scorer.scorer_type == "llm_judge" %>>
+    <textarea name="scorer[content]" rows="10" class="form-input"
+              style="font-family: var(--font-mono); font-size: 13px; line-height: 1.8; resize: vertical;"
+              placeholder="<%= default_judge_template %>"><%= scorer.content if scorer.scorer_type == "llm_judge" %></textarea>
+    <p class="form-hint">Available placeholders: <code>{prompt_content}</code>, <code>{input_vars}</code>, <code>{output}</code>, <code>{expected_output}</code>.</p>
+  </div>
+
+  <div data-scorer-form-target="regexContent" <%= "hidden" unless scorer.scorer_type == "regex" %>>
+    <input type="text" name="scorer[content]"
+           value="<%= scorer.content if scorer.scorer_type == 'regex' %>"
+           placeholder="^(yes|no|maybe)$"
+           class="form-input" style="font-family: var(--font-mono);">
+    <p class="form-hint">Ruby-compatible regex. Max 500 characters. Score = 1.0 if match, 0.0 if no match.</p>
+  </div>
+
+  <div data-scorer-form-target="customContent" <%= "hidden" unless scorer.scorer_type == "custom" %>>
+    <textarea name="scorer[content]" rows="4" class="form-input" style="resize: vertical;"
+              placeholder="Describe the custom scoring logic…"><%= scorer.content if scorer.scorer_type == "custom" %></textarea>
+    <p class="form-hint">Describe how this scorer should evaluate outputs.</p>
+  </div>
+</div>
+
+<div class="form-group" data-scorer-form-target="modelGroup"
+     <%= "hidden" unless scorer.scorer_type == "llm_judge" %>>
+  <label class="form-label" for="scorer_model_hint">Model</label>
+  <select name="scorer[model_hint]" id="scorer_model_hint" class="form-input">
+    <option value="claude-sonnet-4-6" <%= "selected" if scorer.model_hint == "claude-sonnet-4-6" %>>Claude Sonnet 4.6</option>
+    <option value="claude-haiku-4-5"  <%= "selected" if scorer.model_hint == "claude-haiku-4-5" %>>Claude Haiku 4.5</option>
+  </select>
+  <p class="form-hint">Model used to run the judge prompt.</p>
+</div>
