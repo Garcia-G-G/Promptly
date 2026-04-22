@@ -1337,3 +1337,69 @@ select:focus {
   outline: none;
 }
 
+/* ── Hidden utility ── */
+
+.hidden { display: none !important; }
+
+/* ── Tag badge ── */
+
+.tag-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  background: var(--card-hover);
+  color: var(--t2);
+  border-radius: 20px;
+  border: 1px solid var(--card-border);
+  margin-right: 4px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+
+/* ── JSON viewer ── */
+
+.json-viewer {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--t1);
+}
+
+.json-viewer pre {
+  background: var(--bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  overflow-x: auto;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.json-viewer__key { color: var(--blue); font-weight: 500; }
+.json-viewer__value { color: var(--t2); }
+
+/* ── Expandable row (clickable → expanded detail) ── */
+
+.expandable-row { transition: background 0.1s; }
+.expandable-row:hover { background: var(--card-hover); }
+.expandable-row__detail > td {
+  border-top: 1px dashed var(--card-border);
+  background: var(--bg);
+}
+
+/* ── Danger button ── */
+
+.btn--danger {
+  background: var(--red-soft);
+  color: var(--red);
+  border: 1px solid var(--red);
+}
+
+.btn--danger:hover {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+}
+
