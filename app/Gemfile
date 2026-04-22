@@ -29,6 +29,10 @@ gem "solid_cable"
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
+# CSV leaves the Ruby stdlib in 3.4; declare it explicitly for forward
+# compatibility (used by Web::DatasetsController for CSV imports).
+gem "csv"
+
 # Deploy this application anywhere as a Docker container [https://kamal-deploy.org]
 gem "kamal", require: false
 
