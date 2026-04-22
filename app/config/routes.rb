@@ -30,7 +30,16 @@ Rails.application.routes.draw do
       end
       resources :scorers, only: [ :index, :new, :create, :edit, :update, :destroy ]
       resources :eval_runs, only: [ :index, :show, :new, :create ]
-      resource :settings, only: [ :show ]
+      resource :settings, only: [ :show, :update ] do
+        get :team
+        get :billing
+        get :api_keys
+        post :create_api_key
+        delete "api_keys/:id", action: :revoke_api_key, as: :revoke_api_key
+        post :invite_member
+        patch "team/:id/role", action: :update_role, as: :update_member_role
+        delete "team/:id", action: :remove_member, as: :remove_member
+      end
     end
   end
 

@@ -1529,3 +1529,81 @@ select:focus {
   .progress-bar__fill--animated { animation: none !important; }
 }
 
+/* ── Settings tabs ── */
+
+.settings-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--card-border);
+  margin-bottom: 0;
+  flex-wrap: wrap;
+}
+
+.settings-tab {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--t3);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+
+.settings-tab:hover { color: var(--t1); }
+
+.settings-tab--active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Danger zone ── */
+
+.danger-zone {
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  padding: 20px;
+  background: var(--red-soft);
+}
+
+.btn--danger[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Confirm dialog (modal overlay) ── */
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.confirm-modal {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 440px;
+  width: 90%;
+  box-shadow: var(--shadow-md);
+}
+
+.confirm-modal__title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--t1);
+}
+
+.confirm-modal__message {
+  font-size: 14px;
+  color: var(--t2);
+  line-height: 1.5;
+}
+
