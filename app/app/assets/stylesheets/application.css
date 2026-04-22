@@ -1672,3 +1672,44 @@ select:focus {
   color: var(--t3);
 }
 
+/* ── Plan card (current subscription banner) ── */
+
+.plan-card {
+  background: var(--accent-light);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+/* ── Usage meter ── */
+
+.usage-meter__track {
+  height: 8px;
+  background: var(--bg);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.usage-meter__fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+  transition: width 0.5s ease;
+}
+
+.usage-meter__fill--warning { background: var(--amber); }
+.usage-meter__fill--danger  { background: var(--red); }
+
+/* ── Plan comparison (pricing table highlight) ── */
+
+.plan-comparison .data-table th:nth-child(3),
+.plan-comparison .data-table td:nth-child(3) {
+  background: var(--accent-light);
+}
+
+.plan-comparison .data-table th:nth-child(3) {
+  color: var(--accent);
+  font-weight: 600;
+}
+
