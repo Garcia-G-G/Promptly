@@ -17,7 +17,7 @@ This file configures how Claude Code should operate in this repository. Read `CO
 - Database: **Postgres 16+** only. No secondary DB.
 - Deploys: **Kamal 2** with Kamal Proxy (not Traefik).
 - UI: **Hotwire** (Turbo Frames + Turbo Streams). Stimulus only when unavoidable. No React / Vue / etc.
-- Anthropic calls via the official `anthropic` gem.
+- OpenAI calls via the `ruby-openai` gem.
 - Stripe via `stripe-ruby` using **Billing Meters** (the new API, not `usage_records`).
 - GitHub via `octokit`.
 - Linter: `rubocop-rails-omakase`.
