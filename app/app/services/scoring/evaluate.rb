@@ -10,22 +10,25 @@ module Scoring
     end
 
     def self.score_with_llm(scorer, prompt_content, input_vars, output)
-      client = Anthropic::Client.new(api_key: ENV.fetch("ANTHROPIC_API_KEY"))
+      client = OpenAI::Client.new(access_token: ENV.fetch("OPENAI_API_KEY"))
 
-      response = client.messages.create(
-        model: scorer.model_hint || PromptVersion::DEFAULT_MODEL_HINT,
-        max_tokens: 256,
-        system_: scorer.content,
-        messages: [
-          {
-            role: "user",
-            content: "Prompt used:\n#{prompt_content}\n\nVariables provided:\n#{input_vars.to_json}\n\nOutput received:\n#{output}"
-          }
-        ]
+      response = client.chat(
+        parameters: {
+          model: scorer.model_hint || PromptVersion::DEFAULT_MODEL_HINT,
+          max_tokens: 256,
+          messages: [
+            { role: "system", content: scorer.content },
+            {
+              role: "user",
+              content: "Prompt used:\n#{prompt_content}\n\nVariables provided:\n#{input_vars.to_json}\n\nOutput received:\n#{output}"
+            }
+          ],
+          response_format: { type: "json_object" }
+        }
       )
 
-      text = response.content.first.text
-      parsed = JSON.parse(text)
+      text = response.dig("choices", 0, "message", "content")
+      parsed = JSON.parse(text.to_s)
       [ parsed["score"].to_f.clamp(0.0, 1.0), parsed["rationale"].to_s ]
     rescue JSON::ParserError => e
       [ nil, "scoring_error: #{e.message}" ]
