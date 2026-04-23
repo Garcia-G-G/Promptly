@@ -74,7 +74,7 @@ module Web
         input_vars: {},
         latency_ms: 42,
         score: 0.75,
-        model_version: "claude-sonnet-4-6"
+        model_version: "gpt-4o"
       }.merge(overrides))
     end
   end

@@ -21,7 +21,7 @@ module Web
         post workspace_web_prompt_versions_path(@workspace.slug, @prompt.slug), params: {
           prompt_version: {
             content: "Updated content in {language} with {tone}.",
-            model_hint: "claude-sonnet-4-6"
+            model_hint: "gpt-4o"
           }
         }
       end

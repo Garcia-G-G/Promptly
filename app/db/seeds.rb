@@ -36,7 +36,7 @@ scorer = Scorer.find_or_create_by!(project: project, name: "default-quality") do
     - 0.6–0.8 = good
     - 0.8–1.0 = excellent
   PROMPT
-  s.model_hint = "claude-sonnet-4-6"
+  s.model_hint = "gpt-4o"
 end
 puts "  Scorer: #{scorer.name} (#{scorer.scorer_type})"
 
@@ -55,7 +55,7 @@ unless prompt.prompt_versions.exists?(environment: "dev")
       { "name" => "length", "description" => "Output format", "default" => "3 bullet points" },
       { "name" => "document", "description" => "The document to summarize", "default" => "" }
     ],
-    model_hint: "claude-sonnet-4-6",
+    model_hint: "gpt-4o",
     created_via: :api
   )
 end
