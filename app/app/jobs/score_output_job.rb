@@ -1,7 +1,7 @@
 class ScoreOutputJob < ApplicationJob
   queue_as :default
 
-  retry_on Anthropic::Errors::APIError, wait: :polynomially_longer, attempts: 5
+  retry_on Faraday::Error, wait: :polynomially_longer, attempts: 5
   discard_on ActiveRecord::RecordNotFound
 
   def perform(log_id:, scorer_id:)
@@ -13,8 +13,8 @@ class ScoreOutputJob < ApplicationJob
     # would double-score. Early return is safe because scores are final.
     return if log.score.present?
 
-    if scorer.type_llm_judge? && ENV["ANTHROPIC_API_KEY"].blank?
-      log.update_columns(score_rationale: "scoring_disabled: ANTHROPIC_API_KEY not configured", scorer_id: scorer.id)
+    if scorer.type_llm_judge? && ENV["OPENAI_API_KEY"].blank?
+      log.update_columns(score_rationale: "scoring_disabled: OPENAI_API_KEY not configured", scorer_id: scorer.id)
       return
     end
 
