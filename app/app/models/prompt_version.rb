@@ -1,5 +1,5 @@
 class PromptVersion < ApplicationRecord
-  DEFAULT_MODEL_HINT = "claude-sonnet-4-6"
+  DEFAULT_MODEL_HINT = "gpt-4o"
 
   belongs_to :prompt
   belongs_to :parent_version, class_name: "PromptVersion", optional: true

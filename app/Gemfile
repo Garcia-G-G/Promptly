@@ -48,7 +48,7 @@ gem "devise"
 # External services
 gem "stripe"
 gem "octokit"
-gem "anthropic"
+gem "ruby-openai"
 
 # Observability
 gem "opentelemetry-sdk"
