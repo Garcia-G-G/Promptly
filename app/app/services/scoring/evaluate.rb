@@ -9,8 +9,13 @@ module Scoring
       end
     end
 
+    LLM_REQUEST_TIMEOUT = 30
+
     def self.score_with_llm(scorer, prompt_content, input_vars, output)
-      client = OpenAI::Client.new(access_token: ENV.fetch("OPENAI_API_KEY"))
+      client = OpenAI::Client.new(
+        access_token: ENV.fetch("OPENAI_API_KEY"),
+        request_timeout: LLM_REQUEST_TIMEOUT
+      )
 
       response = client.chat(
         parameters: {

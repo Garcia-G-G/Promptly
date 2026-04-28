@@ -34,13 +34,12 @@
   </div>
   <% @experiments.each do |exp| %>
     <%
-      scores_by_variant = exp.experiment_results.group(:variant).average(:score)
-      counts_by_variant = exp.experiment_results.group(:variant).count
-      score_a = scores_by_variant["a"]&.round(2)
-      score_b = scores_by_variant["b"]&.round(2)
-      n_a = counts_by_variant["a"] || 0
-      n_b = counts_by_variant["b"] || 0
-      total = n_a + n_b
+      stats   = @experiment_stats[exp.id] || { "a" => { avg: nil, count: 0 }, "b" => { avg: nil, count: 0 } }
+      score_a = stats["a"][:avg]
+      score_b = stats["b"][:avg]
+      n_a     = stats["a"][:count]
+      n_b     = stats["b"][:count]
+      total   = n_a + n_b
       leading = if score_a && score_b
                   score_b > score_a ? "b" : (score_a > score_b ? "a" : nil)
                 end

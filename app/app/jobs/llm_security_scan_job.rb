@@ -26,7 +26,10 @@ class LlmSecurityScanJob < ApplicationJob
       return
     end
 
-    client = OpenAI::Client.new(access_token: ENV.fetch("OPENAI_API_KEY"))
+    client = OpenAI::Client.new(
+      access_token: ENV.fetch("OPENAI_API_KEY"),
+      request_timeout: 45
+    )
 
     response = client.chat(
       parameters: {

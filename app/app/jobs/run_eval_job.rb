@@ -59,10 +59,15 @@ class RunEvalJob < ApplicationJob
     )
   end
 
+  GENERATE_TIMEOUT_SECONDS = 60
+
   def generate_output(prompt_content, model_hint)
     return nil if ENV["OPENAI_API_KEY"].blank?
 
-    client = OpenAI::Client.new(access_token: ENV.fetch("OPENAI_API_KEY"))
+    client = OpenAI::Client.new(
+      access_token: ENV.fetch("OPENAI_API_KEY"),
+      request_timeout: GENERATE_TIMEOUT_SECONDS
+    )
     response = client.chat(
       parameters: {
         model: model_hint || PromptVersion::DEFAULT_MODEL_HINT,
