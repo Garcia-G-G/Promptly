@@ -20,6 +20,12 @@ class LlmSecurityScanJob < ApplicationJob
     scan = SecurityScan.find(security_scan_id)
     return if scan.clean? || scan.flagged?
 
+    if ENV["OPENAI_API_KEY"].blank?
+      Rails.logger.warn("LlmSecurityScanJob skipped: OPENAI_API_KEY not configured")
+      scan.update!(status: scan.findings.any? ? :flagged : :clean, finished_at: Time.current)
+      return
+    end
+
     client = OpenAI::Client.new(access_token: ENV.fetch("OPENAI_API_KEY"))
 
     response = client.chat(

@@ -11,6 +11,8 @@ module Web
       invite_member update_role remove_member
     ].freeze
 
+    INVITABLE_ROLES = %w[admin developer viewer].freeze
+
     before_action :require_admin_or_owner!, only: ADMIN_ACTIONS
 
     def show
@@ -35,15 +37,22 @@ module Web
 
     def invite_member
       email = params[:email].to_s.strip.downcase
-      user = User.find_by(email: email)
+      role = params[:role].to_s.presence || "developer"
 
+      unless INVITABLE_ROLES.include?(role)
+        redirect_to team_workspace_web_settings_path(@workspace.slug),
+          alert: "Invalid role. Choose one of: #{INVITABLE_ROLES.join(', ')}."
+        return
+      end
+
+      user = User.find_by(email: email)
       if user.nil?
         redirect_to team_workspace_web_settings_path(@workspace.slug),
           alert: "No user found with that email address. They must sign up first."
         return
       end
 
-      membership = @workspace.memberships.build(user: user, role: params[:role].presence || "developer")
+      membership = @workspace.memberships.build(user: user, role: role)
       if membership.save
         MemberInvitationMailer.invite(membership).deliver_later
         redirect_to team_workspace_web_settings_path(@workspace.slug),
@@ -56,6 +65,7 @@ module Web
 
     def update_role
       membership = @workspace.memberships.find(params[:id])
+      role = params[:role].to_s
 
       if membership.owner?
         redirect_to team_workspace_web_settings_path(@workspace.slug),
@@ -63,9 +73,15 @@ module Web
         return
       end
 
-      if membership.update(role: params[:role])
+      unless INVITABLE_ROLES.include?(role)
         redirect_to team_workspace_web_settings_path(@workspace.slug),
-          notice: "Role updated to #{params[:role]}."
+          alert: "Invalid role. Choose one of: #{INVITABLE_ROLES.join(', ')}."
+        return
+      end
+
+      if membership.update(role: role)
+        redirect_to team_workspace_web_settings_path(@workspace.slug),
+          notice: "Role updated to #{role}."
       else
         redirect_to team_workspace_web_settings_path(@workspace.slug),
           alert: membership.errors.full_messages.to_sentence
