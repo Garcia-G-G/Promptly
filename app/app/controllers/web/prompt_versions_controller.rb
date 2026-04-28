@@ -12,7 +12,7 @@ module Web
       version = PromptVersions::Push.call(
         prompt: @prompt,
         content: content,
-        variables: extract_variables(content),
+        variables: PromptVariables.extract(content),
         model_hint: params.dig(:prompt_version, :model_hint).presence || PromptVersion::DEFAULT_MODEL_HINT,
         created_by: current_user,
         created_via: :ui,
@@ -33,10 +33,6 @@ module Web
       @prompt = Prompt.joins(:project)
         .where(projects: { workspace_id: @workspace.id })
         .find_by!(slug: params[:prompt_slug])
-    end
-
-    def extract_variables(content)
-      content.scan(/\{([a-z_][a-z0-9_]*)\}/i).flatten.uniq.map { |name| { "name" => name } }
     end
   end
 end
