@@ -21,12 +21,20 @@ class ApplicationController < ActionController::Base
   def set_sidebar_counts
     return unless current_workspace
 
-    scoped_prompts = Prompt.joins(:project).where(projects: { workspace_id: current_workspace.id })
-    @prompt_count = scoped_prompts.count
-    @experiment_count = Experiment.joins(prompt: { project: :workspace })
-      .where(workspaces: { id: current_workspace.id })
-      .where(status: :running)
-      .count
+    # Counter-cache backed sum — no COUNT(*) on prompts.
+    @prompt_count = current_workspace.projects.sum(:prompts_count)
+
+    # Running experiments flip relatively rarely; a 2-minute cache keeps
+    # this off the hot path without making the sidebar visibly stale.
+    @experiment_count = Rails.cache.fetch(
+      "workspace:#{current_workspace.id}:running_experiments",
+      expires_in: 2.minutes
+    ) do
+      Experiment.joins(prompt: { project: :workspace })
+        .where(workspaces: { id: current_workspace.id })
+        .where(status: :running)
+        .count
+    end
   end
 
   def current_workspace

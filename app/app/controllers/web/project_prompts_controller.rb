@@ -11,10 +11,11 @@ module Web
 
       ActiveRecord::Base.transaction do
         @prompt.save!
+        content = params.dig(:prompt, :content).to_s
         PromptVersions::Push.call(
           prompt: @prompt,
-          content: params.dig(:prompt, :content).to_s,
-          variables: extract_variables(params.dig(:prompt, :content).to_s),
+          content: content,
+          variables: PromptVariables.extract(content),
           model_hint: params.dig(:prompt, :model_hint).presence || PromptVersion::DEFAULT_MODEL_HINT,
           created_by: current_user,
           created_via: :ui
@@ -37,12 +38,6 @@ module Web
 
     def prompt_attrs
       params.require(:prompt).permit(:slug, :description)
-    end
-
-    # Extract `{variable_name}` tokens from the content into the shape
-    # PromptVersions::Push expects (an array of { "name" => ... } hashes).
-    def extract_variables(content)
-      content.scan(/\{([a-z_][a-z0-9_]*)\}/i).flatten.uniq.map { |name| { "name" => name } }
     end
   end
 end

@@ -25,7 +25,7 @@ module Web
               slug: "ticket-classifier",
               description: "Classifies support tickets",
               content: "Classify the following ticket into one of {categories}.",
-              model_hint: "claude-haiku-4-5"
+              model_hint: "gpt-4o-mini"
             }
           }
         end

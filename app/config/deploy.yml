@@ -1,119 +1,86 @@
-# Name of your application. Used to uniquely configure containers.
+# Kamal 2 deployment configuration.
+#
+# Hosts, image registry, and app host are driven by environment variables
+# so the same file works across staging and production without rewriting.
 service: promptly
 
-# Name of the container image (use your-user/app-name on external registries).
-image: promptly
+image: <%= ENV["DOCKER_REGISTRY"] || "ghcr.io" %>/<%= ENV["DOCKER_REPO"] || "promptly-dev/promptly" %>
 
-# Deploy to these servers.
 servers:
   web:
-    - 192.168.0.1
-  # job:
-  #   hosts:
-  #     - 192.168.0.1
-  #   cmd: bin/jobs
+    hosts:
+      - <%= ENV["WEB_HOST"] || "192.168.0.1" %>
+    labels:
+      logging: "production"
+    options:
+      memory: "512m"
+      memory-reservation: "256m"
+  job:
+    hosts:
+      - <%= ENV["JOB_HOST"] || ENV["WEB_HOST"] || "192.168.0.1" %>
+    cmd: bin/jobs
+    options:
+      memory: "512m"
+      memory-reservation: "256m"
 
-# Enable SSL auto certification via Let's Encrypt and allow for multiple apps on a single web server.
-# If used with Cloudflare, set encryption mode in SSL/TLS setting to "Full" to enable CF-to-app encryption.
-#
-# Using an SSL proxy like this requires turning on config.assume_ssl and config.force_ssl in production.rb!
-#
-# Don't use this when deploying to multiple web servers (then you have to terminate SSL at your load balancer).
-#
-# proxy:
-#   ssl: true
-#   host: app.example.com
+proxy:
+  ssl: true
+  host: <%= ENV["APP_HOST"] || "app.promptly.dev" %>
+  healthcheck:
+    interval: 3
+    path: /up
+    timeout: 5
 
-# Where you keep your container images.
 registry:
-  # Alternatives: hub.docker.com / registry.digitalocean.com / ghcr.io / ...
-  server: localhost:5555
+  server: <%= ENV["DOCKER_REGISTRY"] || "ghcr.io" %>
+  username:
+    - KAMAL_REGISTRY_USERNAME
+  password:
+    - KAMAL_REGISTRY_PASSWORD
 
-  # Needed for authenticated registries.
-  # username: your-user
-
-  # Always use an access token rather than real password when possible.
-  # password:
-  #   - KAMAL_REGISTRY_PASSWORD
-
-# Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:
+  clear:
+    RAILS_LOG_LEVEL: info
+    RAILS_SERVE_STATIC_FILES: "true"
+    WEB_CONCURRENCY: "2"
+    SOLID_QUEUE_IN_PUMA: "false"
   secret:
     - RAILS_MASTER_KEY
-  clear:
-    # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
-    # When you start using multiple servers, you should split out job processing to a dedicated machine.
-    SOLID_QUEUE_IN_PUMA: true
+    - DATABASE_URL
+    - REDIS_URL
+    - STRIPE_SECRET_KEY
+    - STRIPE_WEBHOOK_SECRET
+    - OPENAI_API_KEY
+    - OTEL_EXPORTER_OTLP_ENDPOINT
+    - SENTRY_DSN
+    - SMTP_ADDRESS
+    - SMTP_USERNAME
+    - SMTP_PASSWORD
+    - MAILER_FROM
+    - APP_HOST
 
-    # Set number of processes dedicated to Solid Queue (default: 1)
-    # JOB_CONCURRENCY: 3
+asset_path: /rails/public/assets
 
-    # Set number of cores available to the application on each server (default: 1).
-    # WEB_CONCURRENCY: 2
+logging:
+  driver: json-file
+  options:
+    max-size: "50m"
+    max-file: "3"
 
-    # Match this to any external database server to configure Active Record correctly
-    # Use promptly-db for a db accessory server on same machine via local kamal docker network.
-    # DB_HOST: 192.168.0.2
+accessories:
+  redis:
+    image: redis:7-alpine
+    host: <%= ENV["REDIS_HOST"] || ENV["WEB_HOST"] || "192.168.0.1" %>
+    port: "127.0.0.1:6379:6379"
+    cmd: "redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru"
+    options:
+      memory: "256m"
 
-    # Log everything from Rails
-    # RAILS_LOG_LEVEL: debug
+builder:
+  arch: amd64
 
-# Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
-# "bin/kamal logs -r job" will tail logs from the first server in the job section.
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
   shell: app exec --interactive --reuse "bash"
   logs: app logs -f
   dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
-
-# Use a persistent storage volume for sqlite database files and local Active Storage files.
-# Recommended to change this to a mounted volume path that is backed up off server.
-volumes:
-  - "promptly_storage:/rails/storage"
-
-# Bridge fingerprinted assets, like JS and CSS, between versions to avoid
-# hitting 404 on in-flight requests. Combines all files from new and old
-# version inside the asset_path.
-asset_path: /rails/public/assets
-
-# Configure the image builder.
-builder:
-  arch: amd64
-
-  # # Build image via remote server (useful for faster amd64 builds on arm64 computers)
-  # remote: ssh://docker@docker-builder-server
-  #
-  # # Pass arguments and secrets to the Docker build process
-  # args:
-  #   RUBY_VERSION: 3.3.8
-  # secrets:
-  #   - GITHUB_TOKEN
-  #   - RAILS_MASTER_KEY
-
-# Use a different ssh user than root
-# ssh:
-#   user: app
-
-# Use accessory services (secrets come from .kamal/secrets).
-# accessories:
-#   db:
-#     image: mysql:8.0
-#     host: 192.168.0.2
-#     # Change to 3306 to expose port to the world instead of just local network.
-#     port: "127.0.0.1:3306:3306"
-#     env:
-#       clear:
-#         MYSQL_ROOT_HOST: '%'
-#       secret:
-#         - MYSQL_ROOT_PASSWORD
-#     files:
-#       - config/mysql/production.cnf:/etc/mysql/my.cnf
-#       - db/production.sql:/docker-entrypoint-initdb.d/setup.sql
-#     directories:
-#       - data:/var/lib/mysql
-#   redis:
-#     image: valkey/valkey:8
-#     host: 192.168.0.2
-#     port: 6379
-#     directories:
-#       - data:/data

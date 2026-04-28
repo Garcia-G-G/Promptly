@@ -65,7 +65,7 @@
       <% @current_version.content.split("\n").each_with_index do |line, i| %>
         <div class="prompt-content__line">
           <span class="prompt-content__num"><%= i + 1 %></span>
-          <span class="prompt-content__text"><%= line.gsub(/\{(\w+)\}/) { "<span style='color: var(--accent); font-weight: 500;'>{#{$1}}</span>" }.html_safe %></span>
+          <span class="prompt-content__text"><%= highlight_prompt_variables(line) %></span>
         </div>
       <% end %>
     </div>

@@ -31,6 +31,9 @@ class WorkspacesController < ApplicationController
       .where(status: :running)
       .includes(prompt: :project)
       .limit(5)
+      .to_a
+
+    @experiment_stats = build_experiment_stats(@experiments)
 
     log_scope = Log.joins(project: :workspace).where(workspaces: { id: @workspace.id })
     recent_logs = log_scope.where("logs.created_at > ?", 24.hours.ago)
@@ -54,5 +57,25 @@ class WorkspacesController < ApplicationController
 
     offset = [ (count * 0.95).floor - 1, 0 ].max
     scope.where.not(latency_ms: nil).order(:latency_ms).offset(offset).limit(1).pick(:latency_ms)
+  end
+
+  # One GROUP BY across all running experiments, vs two queries per
+  # experiment in the view. With five experiments that's 2 queries
+  # instead of 10.
+  def build_experiment_stats(experiments)
+    blank = { "a" => { avg: nil, count: 0 }, "b" => { avg: nil, count: 0 } }
+    return {} if experiments.empty?
+
+    rows = ExperimentResult
+      .where(experiment_id: experiments.map(&:id))
+      .group(:experiment_id, :variant)
+      .pluck(Arel.sql("experiment_id, variant, AVG(score), COUNT(*)"))
+
+    stats = experiments.each_with_object({}) { |e, h| h[e.id] = blank.deep_dup }
+    rows.each do |eid, variant, avg, count|
+      next unless stats[eid] && %w[a b].include?(variant)
+      stats[eid][variant] = { avg: avg&.to_f&.round(2), count: count.to_i }
+    end
+    stats
   end
 end

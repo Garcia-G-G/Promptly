@@ -23,6 +23,21 @@ class Rack::Attack
     req.ip if req.path == "/users/sign_in" && req.post?
   end
 
+  # Password reset brute-force protection
+  throttle("password_reset/ip", limit: 5, period: 15.minutes) do |req|
+    req.ip if req.path == "/users/password" && req.post?
+  end
+
+  # API key creation throttle (per IP) — web dashboard only
+  throttle("api_key_creation/ip", limit: 5, period: 1.hour) do |req|
+    req.ip if req.post? && req.path.include?("/settings/create_api_key")
+  end
+
+  # Member invitation throttle (per IP) — prevents invite spam
+  throttle("invite/ip", limit: 10, period: 1.hour) do |req|
+    req.ip if req.post? && req.path.include?("/settings/invite_member")
+  end
+
   # Custom JSON response for throttled requests
   self.throttled_responder = lambda do |req|
     match_data = req.env["rack.attack.match_data"]

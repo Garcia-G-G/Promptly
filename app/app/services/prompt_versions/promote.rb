@@ -18,7 +18,7 @@ module PromptVersions
 
       prompt = prompt_version.prompt
 
-      ActiveRecord::Base.transaction do
+      new_version = ActiveRecord::Base.transaction do
         # Archive current active version in target environment (if any)
         current = prompt.prompt_versions.where(environment: to_env).first
         current&.update!(environment: :archived)
@@ -35,6 +35,11 @@ module PromptVersions
           parent_version: prompt_version
         )
       end
+
+      # Bust the resolve cache so the next call sees the new version.
+      Prompts::Resolve.bust_cache(project_id: prompt.project_id, slug: prompt.slug, environment: to_env)
+
+      new_version
     end
   end
 end

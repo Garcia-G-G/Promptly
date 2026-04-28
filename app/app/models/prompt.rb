@@ -1,5 +1,5 @@
 class Prompt < ApplicationRecord
-  belongs_to :project
+  belongs_to :project, counter_cache: true
 
   has_many :prompt_versions, dependent: :destroy
   has_many :experiments, dependent: :destroy

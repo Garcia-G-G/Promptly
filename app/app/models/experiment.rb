@@ -13,6 +13,9 @@ class Experiment < ApplicationRecord
   validates :name, presence: true, uniqueness: { scope: :prompt_id }
   validates :traffic_split, numericality: { only_integer: true, greater_than: 0, less_than: 100 }
   validates :environment, inclusion: { in: %w[dev staging production] }
+  validates :auto_rollback_threshold,
+    numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 },
+    allow_nil: true
   validate :variants_belong_to_same_prompt
   validate :variants_differ
   validate :canary_stage_allowed

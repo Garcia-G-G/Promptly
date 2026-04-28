@@ -10,7 +10,8 @@ module Api
       after_action :report_sdk_usage!, only: [ :resolve ]
 
       def index
-        prompts = current_project.prompts.order(:slug)
+        limit = [ params.fetch(:limit, 100).to_i, 200 ].min.clamp(1, 200)
+        prompts = current_project.prompts.order(:slug).limit(limit)
         render json: prompts.map { |p| Serializers::PromptSerializer.call(p) }
       end
 

@@ -1713,3 +1713,10 @@ select:focus {
   font-weight: 600;
 }
 
+/* ── Prompt variable highlight (safe-escaped) ── */
+
+.prompt-variable {
+  color: var(--accent);
+  font-weight: 500;
+}
+

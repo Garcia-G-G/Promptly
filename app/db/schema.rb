@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_18_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_22_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -35,10 +35,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_000001) do
     t.jsonb "tags", default: [], null: false
     t.datetime "updated_at", null: false
     t.index ["dataset_id"], name: "index_dataset_rows_on_dataset_id"
+    t.index ["input_vars"], name: "index_dataset_rows_on_input_vars", using: :gin
   end
 
   create_table "datasets", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.integer "dataset_rows_count", default: 0, null: false
     t.text "description"
     t.string "name", null: false
     t.bigint "project_id", null: false
@@ -87,6 +89,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_000001) do
     t.float "score"
     t.string "variant", null: false
     t.index ["experiment_id", "variant", "created_at"], name: "idx_experiment_results_variant"
+    t.index ["experiment_id", "variant", "score"], name: "index_experiment_results_on_scored", where: "(score IS NOT NULL)"
     t.index ["experiment_id"], name: "index_experiment_results_on_experiment_id"
     t.index ["log_id"], name: "index_experiment_results_on_log_id"
   end
@@ -110,6 +113,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_000001) do
     t.index ["prompt_id", "environment"], name: "idx_experiments_one_running_per_prompt_env", unique: true, where: "((status)::text = 'running'::text)"
     t.index ["prompt_id", "name"], name: "index_experiments_on_prompt_id_and_name", unique: true
     t.index ["prompt_id"], name: "index_experiments_on_prompt_id"
+    t.index ["status", "environment"], name: "index_experiments_on_running_status", where: "((status)::text = 'running'::text)"
     t.index ["variant_a_version_id"], name: "index_experiments_on_variant_a_version_id"
     t.index ["variant_b_version_id"], name: "index_experiments_on_variant_b_version_id"
     t.index ["winner_version_id"], name: "index_experiments_on_winner_version_id"
@@ -148,6 +152,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_000001) do
     t.string "variant"
     t.index ["experiment_id", "variant", "created_at"], name: "idx_logs_experiment_variant", where: "(experiment_id IS NOT NULL)"
     t.index ["experiment_id"], name: "index_logs_on_experiment_id"
+    t.index ["input_vars"], name: "index_logs_on_input_vars", using: :gin
+    t.index ["project_id", "created_at", "score"], name: "index_logs_on_project_time_score", where: "(score IS NOT NULL)"
     t.index ["project_id"], name: "index_logs_on_project_id"
     t.index ["prompt_id", "created_at"], name: "index_logs_on_prompt_id_and_created_at"
     t.index ["prompt_id"], name: "index_logs_on_prompt_id"
@@ -170,6 +176,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_000001) do
   create_table "projects", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name", null: false
+    t.integer "prompts_count", default: 0, null: false
     t.string "slug", null: false
     t.datetime "updated_at", null: false
     t.bigint "workspace_id", null: false
@@ -202,6 +209,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_000001) do
     t.bigint "default_scorer_id"
     t.text "description"
     t.bigint "project_id", null: false
+    t.integer "prompt_versions_count", default: 0, null: false
     t.string "slug", null: false
     t.datetime "updated_at", null: false
     t.index ["default_scorer_id"], name: "index_prompts_on_default_scorer_id"
@@ -434,7 +442,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_000001) do
   add_foreign_key "prompt_versions", "prompts"
   add_foreign_key "prompt_versions", "users", column: "created_by_id"
   add_foreign_key "prompts", "projects"
-  add_foreign_key "prompts", "scorers", column: "default_scorer_id", validate: false
+  add_foreign_key "prompts", "scorers", column: "default_scorer_id"
   add_foreign_key "scorers", "projects"
   add_foreign_key "security_scans", "prompt_versions"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

@@ -3,7 +3,7 @@ default_quality:
   name: "default-quality"
   scorer_type: "llm_judge"
   content: "Score the output quality. Return JSON: {\"score\": 0.0, \"rationale\": \"...\"}"
-  model_hint: "claude-sonnet-4-6"
+  model_hint: "gpt-4o"
   version_number: 1
   active: true
 
@@ -12,7 +12,7 @@ exact_match_scorer:
   name: "exact-match"
   scorer_type: "exact_match"
   content: "expected output"
-  model_hint: "claude-sonnet-4-6"
+  model_hint: "gpt-4o"
   version_number: 1
   active: true
 
@@ -21,6 +21,6 @@ regex_scorer:
   name: "regex-check"
   scorer_type: "regex"
   content: "\\d+ bullets?"
-  model_hint: "claude-sonnet-4-6"
+  model_hint: "gpt-4o"
   version_number: 1
   active: true

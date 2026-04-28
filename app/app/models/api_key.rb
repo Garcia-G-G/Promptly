@@ -9,15 +9,21 @@ class ApiKey < ApplicationRecord
 
   before_validation :generate_key, on: :create
 
-  # Authenticate by looking up the SHA-256 digest of the raw key.
-  # Note: spec suggested per-workspace salt, but that prevents lookup without
-  # knowing workspace_id first. With 192 bits of entropy (SecureRandom.hex(24)),
-  # unsalted SHA-256 is sufficient — collision probability is ~2^-96.
+  # Authenticate a raw API key. Uses the prefix for an index lookup
+  # (narrow candidate set) and then a constant-time digest comparison
+  # so authentication latency doesn't leak information about the key.
   def self.authenticate(raw_key)
     return nil if raw_key.blank?
+    return nil unless raw_key.length >= 8
 
+    prefix = raw_key[0, 8]
     digest = Digest::SHA256.hexdigest(raw_key)
-    key = find_by(key_digest: digest, revoked_at: nil)
+    candidates = where(key_prefix: prefix, revoked_at: nil).limit(5)
+
+    key = candidates.find do |candidate|
+      ActiveSupport::SecurityUtils.secure_compare(candidate.key_digest, digest)
+    end
+
     key&.touch(:last_used_at)
     key
   end

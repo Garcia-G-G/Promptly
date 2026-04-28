@@ -6,8 +6,13 @@ module Experiments
     EXPECTED_LOSS_EPSILON = 0.005
     MONTE_CARLO_SAMPLES = 50_000
 
+    CACHE_TTL = 1.minute
+
     def self.call(experiment:)
-      new(experiment).call
+      count = experiment.experiment_results.count
+      Rails.cache.fetch("significance:#{experiment.id}:#{count}", expires_in: CACHE_TTL) do
+        new(experiment).call
+      end
     end
 
     def initialize(experiment)

@@ -48,7 +48,7 @@ gem "devise"
 # External services
 gem "stripe"
 gem "octokit"
-gem "anthropic"
+gem "ruby-openai"
 
 # Observability
 gem "opentelemetry-sdk"
@@ -72,6 +72,13 @@ gem "strong_migrations"
 # Solid Queue dashboard
 gem "mission_control-jobs"
 
+# Structured single-line request logs (JSON in production)
+gem "lograge"
+
+# Error tracking — no-op unless SENTRY_DSN is set, see config/initializers/sentry.rb
+gem "sentry-ruby"
+gem "sentry-rails"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
@@ -93,6 +100,9 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # Catch N+1 queries interactively during local development
+  gem "bullet"
 end
 
 group :test do

@@ -148,7 +148,7 @@ class Api::V1::PromptsControllerTest < ActionDispatch::IntegrationTest
         output: "A great summary",
         input_vars: { language: "English" },
         latency_ms: 230,
-        model_version: "claude-sonnet-4-6"
+        model_version: "gpt-4o"
       }.to_json,
       headers: api_headers
     assert_response :accepted

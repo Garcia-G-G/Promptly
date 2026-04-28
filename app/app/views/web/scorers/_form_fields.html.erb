@@ -59,8 +59,10 @@
      <%= "hidden" unless scorer.scorer_type == "llm_judge" %>>
   <label class="form-label" for="scorer_model_hint">Model</label>
   <select name="scorer[model_hint]" id="scorer_model_hint" class="form-input">
-    <option value="claude-sonnet-4-6" <%= "selected" if scorer.model_hint == "claude-sonnet-4-6" %>>Claude Sonnet 4.6</option>
-    <option value="claude-haiku-4-5"  <%= "selected" if scorer.model_hint == "claude-haiku-4-5" %>>Claude Haiku 4.5</option>
+    <option value="gpt-4o"      <%= "selected" if scorer.model_hint == "gpt-4o" %>>GPT-4o</option>
+    <option value="gpt-4o-mini" <%= "selected" if scorer.model_hint == "gpt-4o-mini" %>>GPT-4o Mini</option>
+    <option value="gpt-4.1"     <%= "selected" if scorer.model_hint == "gpt-4.1" %>>GPT-4.1</option>
+    <option value="gpt-4.1-mini" <%= "selected" if scorer.model_hint == "gpt-4.1-mini" %>>GPT-4.1 Mini</option>
   </select>
   <p class="form-hint">Model used to run the judge prompt.</p>
 </div>

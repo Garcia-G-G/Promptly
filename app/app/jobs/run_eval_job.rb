@@ -1,7 +1,7 @@
 class RunEvalJob < ApplicationJob
-  queue_as :default
+  queue_as :evaluations
 
-  retry_on Anthropic::Errors::APIError, wait: :polynomially_longer, attempts: 3
+  retry_on Faraday::Error, wait: :polynomially_longer, attempts: 3
   discard_on ActiveRecord::RecordNotFound
 
   def perform(eval_run_id:)
@@ -13,27 +13,25 @@ class RunEvalJob < ApplicationJob
     prompt_content = eval_run.prompt_version.content
     scorer = eval_run.scorer
 
-    # Skip rows already processed (idempotent on retry)
-    processed_row_ids = eval_run.eval_run_results.pluck(:dataset_row_id).to_set
+    # Exclude already-processed rows via subquery so retries don't load
+    # the full row-id set into Ruby memory for large datasets.
+    completed_row_ids = EvalRunResult.where(eval_run_id: eval_run.id).select(:dataset_row_id)
+    pending_rows = eval_run.dataset.dataset_rows.where.not(id: completed_row_ids)
 
-    eval_run.dataset.dataset_rows.find_each do |row|
-      next if processed_row_ids.include?(row.id)
+    pending_rows.find_each(batch_size: 100) do |row|
       process_row(eval_run, row, prompt_content, scorer)
     end
 
     EvalRuns::Complete.call(eval_run: eval_run)
   rescue StandardError => e
     eval_run&.update!(status: :failed, error_message: e.message, finished_at: Time.current)
-    raise if e.is_a?(Anthropic::Errors::APIError)
+    raise if e.is_a?(Faraday::Error)
   end
 
   private
 
   def process_row(eval_run, row, prompt_content, scorer)
     interpolated = interpolate(prompt_content, row.input_vars)
-
-    # For eval, we generate output using the prompt then score it
-    # But since we may not have an API key, handle gracefully
     output = generate_output(interpolated, eval_run.prompt_version.model_hint)
 
     start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
@@ -61,16 +59,23 @@ class RunEvalJob < ApplicationJob
     )
   end
 
-  def generate_output(prompt_content, model_hint)
-    return nil if ENV["ANTHROPIC_API_KEY"].blank?
+  GENERATE_TIMEOUT_SECONDS = 60
 
-    client = Anthropic::Client.new(api_key: ENV.fetch("ANTHROPIC_API_KEY"))
-    response = client.messages.create(
-      model: model_hint || PromptVersion::DEFAULT_MODEL_HINT,
-      max_tokens: 1024,
-      messages: [ { role: "user", content: prompt_content } ]
+  def generate_output(prompt_content, model_hint)
+    return nil if ENV["OPENAI_API_KEY"].blank?
+
+    client = OpenAI::Client.new(
+      access_token: ENV.fetch("OPENAI_API_KEY"),
+      request_timeout: GENERATE_TIMEOUT_SECONDS
     )
-    response.content.first.text
+    response = client.chat(
+      parameters: {
+        model: model_hint || PromptVersion::DEFAULT_MODEL_HINT,
+        max_tokens: 1024,
+        messages: [ { role: "user", content: prompt_content } ]
+      }
+    )
+    response.dig("choices", 0, "message", "content")
   rescue StandardError => e
     Rails.logger.warn("RunEvalJob generate_output failed: #{e.message}")
     nil
@@ -78,9 +83,7 @@ class RunEvalJob < ApplicationJob
 
   def interpolate(content, vars)
     result = content.dup
-    vars.each do |key, value|
-      result.gsub!("{#{key}}", value.to_s)
-    end
+    vars.each { |key, value| result.gsub!("{#{key}}", value.to_s) }
     result
   end
 end

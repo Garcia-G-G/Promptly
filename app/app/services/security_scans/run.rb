@@ -12,7 +12,7 @@ module SecurityScans
       end
 
       # Enqueue async LLM deep scan if API key available
-      LlmSecurityScanJob.perform_later(security_scan_id: scan.id) if ENV["ANTHROPIC_API_KEY"].present?
+      LlmSecurityScanJob.perform_later(security_scan_id: scan.id) if ENV["OPENAI_API_KEY"].present?
 
       scan
     end
